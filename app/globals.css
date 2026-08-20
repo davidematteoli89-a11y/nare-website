@@ -1,34 +1,47 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — MeLoProduco Website, Direzione B (Fase 0):
- * bianco caldo + grafite + terracotta desaturata come accento.
+ * Design tokens — Narè Website, Direzione finale (Fase 2B):
+ * bianco caldo/crema + grafite caldo + terracotta desaturata come accento.
  * La terracotta è un accento, non un colore dominante: usarla per CTA,
- * link attivi, piccoli dettagli — mai per grandi superfici.
+ * link attivi, piccoli dettagli — mai per grandi superfici. Il sistema
+ * deve reggere non solo l'editoria (MeLoProduco) ma anche esperienze,
+ * educazione e territori (Incontri, Ritiri, Famiglie, In Viaggio): nessun
+ * token è nominato in modo specifico a un solo verticale.
  *
- * Questi token sono la SOLA foundation visiva di questa fase (Step 1D).
- * Nessun colore "a caso" per sezione: ogni superficie/testo deve usare
- * uno di questi token, non un valore hex inline.
+ * Contrasto WCAG verificato (Fase 2B) via calcolo luminanza relativa:
+ * - foreground su background: 14.13:1 (AAA)
+ * - foreground-muted su background: 5.41:1 (AA anche per small text)
+ * - accent su background/surface: ~4.1-4.3:1 — sufficiente per UI
+ *   components/large text (bottoni, badge, bordi) ma NON per body text
+ *   piccolo (serve 4.5:1). Per questo esiste --color-accent-text, più
+ *   profondo (5.3-5.6:1), da usare quando la terracotta è colore di testo
+ *   corrente (Eyebrow, link inline) — mai --color-accent per quel caso.
  */
 :root {
-  /* Background: bianco caldo / off-white */
+  /* Background: bianco caldo / crema chiarissimo */
   --color-background: #fbf9f6;
 
-  /* Surface: bianco / crema molto leggero — per card ed elementi rilevati dal background */
+  /* Surface: bianco / crema molto tenue — per card ed elementi rilevati dal background */
   --color-surface: #ffffff;
   --color-surface-subtle: #f4f1ec;
 
-  /* Foreground: grafite / charcoal caldo */
+  /* Foreground: grafite caldo */
   --color-foreground: #2a2724;
+  /* Muted: taupe / grigio caldo */
   --color-foreground-muted: #6b665f;
 
   /* Border: neutro caldo */
   --color-border: #e6e1d8;
   --color-border-strong: #d3ccbf;
 
-  /* Accent: terracotta desaturata */
+  /* Accent: terracotta desaturata — per superfici/bottoni/bordi (UI components) */
   --color-accent: #b5654a;
+  /* Accent hover: terracotta più profonda */
   --color-accent-hover: #9c5540;
+  /* Accent text: stessa famiglia ma abbastanza scura da restare leggibile
+     come testo piccolo (5.3-5.6:1) — usare per Eyebrow, link, micro-copy accentato */
+  --color-accent-text: #9c5540;
   --color-accent-subtle: #f1e3dc;
 
   /* Stato */
@@ -60,6 +73,7 @@
   --color-border-strong: var(--color-border-strong);
   --color-accent: var(--color-accent);
   --color-accent-hover: var(--color-accent-hover);
+  --color-accent-text: var(--color-accent-text);
   --color-accent-subtle: var(--color-accent-subtle);
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
@@ -84,4 +98,86 @@ body {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/*
+ * Scala tipografica editoriale (Fase 2D).
+ *
+ * Regola: SERIF per Hero/H1/H2 importanti/citazioni/momenti editoriali,
+ * SANS per body/navigazione/metadata/form/UI — mai tutto serif o tutto
+ * sans, mai headline "da startup" sproporzionate, mai body minuscolo.
+ *
+ * Queste classi centralizzano dimensione + line-height + font-family, così
+ * i componenti non ripetono combinazioni ad-hoc di classi Tailwind.
+ */
+.text-hero-display {
+  font-family: var(--font-serif);
+  font-size: 2.75rem; /* 44px */
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 640px) {
+  .text-hero-display {
+    font-size: 3.5rem; /* 56px */
+  }
+}
+
+.text-h1 {
+  font-family: var(--font-serif);
+  font-size: 2.25rem; /* 36px */
+  line-height: 1.15;
+}
+@media (min-width: 640px) {
+  .text-h1 {
+    font-size: 2.75rem; /* 44px */
+  }
+}
+
+.text-h2 {
+  font-family: var(--font-serif);
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.2;
+}
+@media (min-width: 640px) {
+  .text-h2 {
+    font-size: 2rem; /* 32px */
+  }
+}
+
+.text-h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.3;
+}
+
+.text-lead {
+  font-family: var(--font-sans);
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.6;
+}
+
+.text-body {
+  font-family: var(--font-sans);
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+}
+
+.text-small {
+  font-family: var(--font-sans);
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.5;
+}
+
+.text-meta {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.4;
+}
+
+.text-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }

@@ -40,7 +40,7 @@ export function MobileNav() {
             className="flex h-full w-72 max-w-[85vw] flex-col gap-6 bg-[var(--color-surface)] p-6 shadow-[var(--shadow-md)]"
           >
             <div className="flex items-center justify-between">
-              <span className="font-[family-name:var(--font-serif)] text-lg text-[var(--color-foreground)]">Narè</span>
+              <span className="text-h3 text-[var(--color-foreground)]">Narè</span>
               <button
                 type="button"
                 aria-label="Chiudi menu"
@@ -58,7 +58,7 @@ export function MobileNav() {
                     <Link
                       href={item.href}
                       onClick={() => setOpen(false)}
-                      className="block rounded-[var(--radius-md)] px-2 py-2.5 text-base text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
+                      className="text-body block rounded-[var(--radius-md)] px-2 py-2.5 text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
                     >
                       {item.label}
                     </Link>
@@ -68,7 +68,7 @@ export function MobileNav() {
                   <Link
                     href="/cerca"
                     onClick={() => setOpen(false)}
-                    className="block rounded-[var(--radius-md)] px-2 py-2.5 text-base text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
+                    className="text-body block rounded-[var(--radius-md)] px-2 py-2.5 text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
                   >
                     Cerca
                   </Link>
@@ -77,7 +77,7 @@ export function MobileNav() {
             </nav>
 
             <div className="mt-auto border-t border-[var(--color-border)] pt-6">
-              <p className="mb-3 text-sm font-medium text-[var(--color-foreground)]">Una mail utile, non rumore.</p>
+              <p className="text-small mb-3 font-medium text-[var(--color-foreground)]">Un po&apos; di Narè, via mail.</p>
               <NewsletterFormShell />
             </div>
           </div>

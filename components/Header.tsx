@@ -13,7 +13,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-background)]/95 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="font-[family-name:var(--font-serif)] text-xl text-[var(--color-foreground)]">
+        <Link href="/" className="text-h3 text-[var(--color-foreground)]">
           Narè
           <span className="sr-only"> — con Cristina di Narè</span>
         </Link>
@@ -22,7 +22,7 @@ export function Header() {
           <ul className="flex items-center gap-6">
             {PRIMARY_NAV.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="text-sm text-[var(--color-foreground)] hover:text-[var(--color-accent)]">
+                <Link href={item.href} className="text-small font-medium text-[var(--color-foreground)] hover:text-[var(--color-accent-text)]">
                   {item.label}
                 </Link>
               </li>
@@ -40,7 +40,7 @@ export function Header() {
           </Link>
           <Link
             href="/newsletter"
-            className="rounded-[var(--radius-md)] border border-[var(--color-border-strong)] px-3.5 py-2 text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
+            className="text-small rounded-[var(--radius-md)] border border-[var(--color-border-strong)] px-3.5 py-2 font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
           >
             Newsletter
           </Link>

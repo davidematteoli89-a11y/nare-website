@@ -8,7 +8,7 @@ export interface Crumb {
 /** Breadcrumbs semplici, con aria-label e current page marcata (accessibilità). */
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-[var(--color-foreground-muted)]">
+    <nav aria-label="Breadcrumb" className="text-small text-[var(--color-foreground-muted)]">
       <ol className="flex flex-wrap items-center gap-1.5">
         {items.map((item, i) => {
           const isLast = i === items.length - 1;

@@ -33,11 +33,11 @@ export function VideoPlaceholder({
         </div>
       </div>
       <div className="p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-accent)]">
+        <p className="text-meta font-semibold uppercase tracking-[0.08em] text-[var(--color-accent-text)]">
           {programme}
           {date ? ` · ${date}` : ""}
         </p>
-        <h3 className="mt-1 font-[family-name:var(--font-serif)] text-base text-[var(--color-foreground)]">{title}</h3>
+        <h3 className="text-h3 mt-1 text-[var(--color-foreground)]">{title}</h3>
       </div>
     </div>
   );
