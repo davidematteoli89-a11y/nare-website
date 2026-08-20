@@ -3,13 +3,19 @@ import { Container } from "./Container";
 import { MobileNav } from "./MobileNav";
 import { PRIMARY_NAV } from "@/lib/nav";
 
-/** Header editoriale pulito e sticky (Step 1G). Niente mega-menu, niente dipendenze pesanti. */
+/**
+ * Header editoriale pulito e sticky (Step 1G, riallineato in Fase 1B).
+ * Logo/wordmark ora è il brand ombrello "Narè", non più "MeLoProduco".
+ * Il descrittore "con Cristina di Narè" è predisposto come sr-only: nessun
+ * mega-menu, nessuna dipendenza pesante.
+ */
 export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-background)]/95 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link href="/" className="font-[family-name:var(--font-serif)] text-xl text-[var(--color-foreground)]">
-          MeLoProduco
+          Narè
+          <span className="sr-only"> — con Cristina di Narè</span>
         </Link>
 
         <nav aria-label="Navigazione principale" className="hidden md:block">

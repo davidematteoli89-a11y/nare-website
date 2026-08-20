@@ -5,7 +5,7 @@ import { NewsletterFormShell } from "@/components/NewsletterFormShell";
 
 export const metadata: Metadata = {
   title: "Newsletter",
-  description: "Iscriviti alla newsletter di MeLoProduco.",
+  description: "Iscriviti alla newsletter di Narè.",
 };
 
 export default function NewsletterPage() {

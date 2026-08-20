@@ -9,12 +9,16 @@ export const metadata: Metadata = {
 };
 
 /**
- * Archivio interventi RAI — Step 1B/1P. Nessun video reale integrato
- * (Cloudflare Stream/RaiPlay/embed ufficiale sono fuori scope Fase 1, e
- * comunque richiedono prima la verifica dei diritti d'uso, vedi Fase 0
- * punto 8). Il singolo VideoPlaceholder qui sotto usa dati palesemente di
- * esempio (nessun intervento reale inventato) solo per verificare il
- * pattern visivo in questa fase.
+ * Archivio interventi RAI — Step 1B/1P, riallineato in Fase 1B (punti 3,
+ * 15): la sezione sostiene l'autorevolezza di tutto Narè, non solo di
+ * MeLoProduco — per questo resta collegata a Cristina (non annidata sotto
+ * /meloproduco) e potrà in futuro rimandare a contenuti di qualunque area
+ * Narè (MeLoProduco, Incontri, Famiglie, ecc.), non solo a ricette.
+ * Nessun video reale integrato (Cloudflare Stream/RaiPlay/embed ufficiale
+ * sono fuori scope, e comunque richiedono prima la verifica dei diritti
+ * d'uso, vedi Fase 0 punto 8). Il singolo VideoPlaceholder qui sotto usa
+ * dati palesemente di esempio (nessun intervento reale inventato) solo per
+ * verificare il pattern visivo in questa fase.
  */
 export default function CristinaInRaiPage() {
   return (

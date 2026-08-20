@@ -40,7 +40,7 @@ export function MobileNav() {
             className="flex h-full w-72 max-w-[85vw] flex-col gap-6 bg-[var(--color-surface)] p-6 shadow-[var(--shadow-md)]"
           >
             <div className="flex items-center justify-between">
-              <span className="font-[family-name:var(--font-serif)] text-lg text-[var(--color-foreground)]">MeLoProduco</span>
+              <span className="font-[family-name:var(--font-serif)] text-lg text-[var(--color-foreground)]">Narè</span>
               <button
                 type="button"
                 aria-label="Chiudi menu"
