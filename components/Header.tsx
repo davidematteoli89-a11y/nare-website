@@ -1,0 +1,47 @@
+import Link from "next/link";
+import { Container } from "./Container";
+import { MobileNav } from "./MobileNav";
+import { PRIMARY_NAV } from "@/lib/nav";
+
+/** Header editoriale pulito e sticky (Step 1G). Niente mega-menu, niente dipendenze pesanti. */
+export function Header() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-background)]/95 backdrop-blur">
+      <Container className="flex h-16 items-center justify-between gap-4">
+        <Link href="/" className="font-[family-name:var(--font-serif)] text-xl text-[var(--color-foreground)]">
+          MeLoProduco
+        </Link>
+
+        <nav aria-label="Navigazione principale" className="hidden md:block">
+          <ul className="flex items-center gap-6">
+            {PRIMARY_NAV.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="text-sm text-[var(--color-foreground)] hover:text-[var(--color-accent)]">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href="/cerca"
+            aria-label="Cerca"
+            className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
+          >
+            <span aria-hidden="true">🔍</span>
+          </Link>
+          <Link
+            href="/newsletter"
+            className="rounded-[var(--radius-md)] border border-[var(--color-border-strong)] px-3.5 py-2 text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-subtle)]"
+          >
+            Newsletter
+          </Link>
+        </div>
+
+        <MobileNav />
+      </Container>
+    </header>
+  );
+}
