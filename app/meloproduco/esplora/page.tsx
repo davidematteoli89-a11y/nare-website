@@ -6,10 +6,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { ExploraClient } from "@/components/discovery/ExploraClient";
 import { listAllPublicRecipes, extractAvailableFilters, type PublicRecipePayload, type AvailableFilters } from "@/lib/aidady-api";
 
-// BUG FIX (Fase 11, audit end-to-end unpublish — difesa in profondità):
-// vedi commento in app/ricette/page.tsx e commento esteso in
-// app/ricette/[slug]/page.tsx.
-export const revalidate = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish): vedi commento esteso
+// in lib/aidady-api.ts — la freschezza è garantita da `cache: "no-store"`
+// sui fetch, non da `revalidate` a livello di pagina.
 
 /**
  * /meloproduco/esplora — Step 11S.

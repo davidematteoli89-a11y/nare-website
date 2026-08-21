@@ -35,9 +35,9 @@ export const metadata: Metadata = {
   },
 };
 
-// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
-// vedi commento esteso in app/ricette/[slug]/page.tsx.
-export const revalidate = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish): vedi commento esteso
+// in lib/aidady-api.ts — la freschezza è garantita da `cache: "no-store"`
+// sui fetch, non da `revalidate` a livello di pagina.
 
 export default async function CosaHaiInCasaPage() {
   const recipes = await safeLoadMatchableRecipes();

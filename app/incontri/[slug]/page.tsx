@@ -17,9 +17,9 @@ import { formatDateIt, formatPriceEur } from "@/lib/format";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
-// vedi commento esteso in app/ricette/[slug]/page.tsx.
-export const revalidate = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish): vedi commento esteso
+// in lib/aidady-api.ts — la freschezza è garantita da `cache: "no-store"`
+// sui fetch, non da `revalidate` a livello di pagina.
 
 /**
  * Dettaglio Narè Incontri definitivo — Fase 5, Step 5H-5L.

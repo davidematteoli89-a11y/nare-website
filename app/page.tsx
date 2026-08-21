@@ -14,12 +14,9 @@ import { raiAppearances } from "@/lib/rai-appearances";
 import { formatDateIt } from "@/lib/format";
 import { Badge } from "@/components/Badge";
 
-// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
-// questa pagina non usa searchParams, quindi senza `revalidate` esplicito
-// Next.js può servirla dalla Full Route Cache indipendentemente dal
-// `next: { revalidate: 30 }` sul fetch interno in lib/aidady-api.ts (vedi
-// stesso fix e commento esteso in app/ricette/[slug]/page.tsx).
-export const revalidate = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish): vedi commento esteso
+// in lib/aidady-api.ts — la freschezza è garantita da `cache: "no-store"`
+// sui fetch, non da `revalidate` a livello di pagina.
 
 /**
  * Homepage definitiva — Fase 2 (Step 2H-2R).

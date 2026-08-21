@@ -10,9 +10,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
-// vedi commento esteso in app/ricette/[slug]/page.tsx.
-export const revalidate = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish): la freschezza dei dati
+// è garantita da `cache: "no-store"` sui fetch in lib/aidady-api.ts (vedi
+// commento esteso lì), non da una direttiva di pagina — `revalidate` qui
+// era insufficiente perché la Next.js Data Cache può sopravvivere al
+// build cache tra un deploy e l'altro.
 
 /**
  * /cerca — Step 11U: ricerca reale attivata (in precedenza solo UI

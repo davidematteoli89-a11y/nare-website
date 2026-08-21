@@ -26,9 +26,9 @@ const CANONICAL_URL = `${siteUrl}/meloproduco`;
 const description =
   "MeLoProduco è il verticale editoriale e pratico di Narè: autoproduzione, casa, preparazioni, botanica ed economia domestica, con un metodo pubblico e trasparente.";
 
-// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
-// vedi commento esteso in app/ricette/[slug]/page.tsx.
-export const revalidate = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish): vedi commento esteso
+// in lib/aidady-api.ts — la freschezza è garantita da `cache: "no-store"`
+// sui fetch, non da `revalidate` a livello di pagina.
 
 export const metadata: Metadata = {
   title: "MeLoProduco",

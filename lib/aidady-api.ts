@@ -38,20 +38,32 @@ import "server-only";
 
 const DEFAULT_BASE_URL = "https://aidady-business-os.vercel.app";
 const ORG_SLUG = "meloproduco";
-// BUG FIX (audit pubblicazione, 21 ago 2026): 300s (5 minuti) di Next.js
-// Data Cache significava che un contenuto annullato in aiDady poteva
-// restare visibile sul sito Narè per fino a 5 minuti anche se l'API
-// aiDady era già aggiornata istantaneamente — verificato end-to-end su
-// Brioche al Burro (pubblica → visibile subito; annulla → ancora
-// visibile per minuti). Abbassato a 30s: nessuna invalidazione attiva
-// (revalidateTag/webhook) introdotta, perché richiederebbe un endpoint
-// dedicato su questo progetto richiamato da aiDady via webhook — due
-// deploy Vercel indipendenti, infrastruttura sproporzionata rispetto al
-// problema una volta che il TTL è basso. 30s è un compromesso: abbastanza
-// breve da non lasciare contenuti ritirati visibili a lungo, abbastanza
-// alto da non generare un fetch a aiDady ad ogni singola richiesta.
-const RECIPES_REVALIDATE_SECONDS = 30;
-const WORKSHOPS_REVALIDATE_SECONDS = 30;
+// BUG FIX #2 (Fase 11, audit end-to-end unpublish, 21-22 ago 2026): il
+// tentativo precedente (revalidate: 30, vedi storia sotto) si è rivelato
+// insufficiente. Causa reale isolata leggendo i build log Vercel: ogni
+// deploy mostra "Restored build cache from previous deployment", e la
+// Next.js Data Cache dei fetch (quella governata da `next.revalidate`) fa
+// parte di quel build cache — un'entry stale creata da un deploy precedente
+// può quindi sopravvivere a un nuovo deploy anche con `revalidate` esplicito
+// a livello di pagina, perché il suo orologio di scadenza non si resetta
+// per il solo fatto di ridistribuire il codice. Verificato end-to-end su
+// Brioche al Burro: unpublished da 15+ minuti nel DB aiDady, Public API già
+// 404 fresco (x-vercel-cache: MISS), eppure /ricette/brioche-al-burro sul
+// sito Narè continuava a servire il contenuto pubblicato, anche con
+// `export const revalidate = 30` aggiunto alla pagina e un nuovo deploy
+// completato.
+//
+// Fix: `cache: "no-store"` su ogni fetch verso l'API pubblica aiDady per
+// Recipe e Workshop — nessuna Data Cache, ogni richiesta legge lo stato
+// vero al momento esatto della richiesta. Il catalogo MeLoProduco è
+// piccolo (poche decine di ricette/workshop) e il traffico del sito non è
+// tale da giustificare il rischio di servire contenuti ritirati pur di
+// risparmiare qualche fetch verso aiDady — la correttezza (specialmente per
+// contenuti annullati/privacy-sensitive) ha priorità sulla cache qui.
+//
+// Storia: 300s iniziali (bug #1, contenuto annullato visibile fino a 5 min)
+// → abbassati a 30s (mitigazione parziale, non risolutiva) → no-store
+// (fix definitivo, bug #2).
 
 function getBaseUrl(): string {
   return process.env.AIDADY_PUBLIC_API_BASE_URL || DEFAULT_BASE_URL;
@@ -255,8 +267,8 @@ export async function getPublicRecipe(slug: string): Promise<PublicRecipePayload
   let res: Response;
   try {
     res = await fetch(url, {
-      // Contenuto pubblico, cache Next standard con revalidazione periodica.
-      next: { revalidate: RECIPES_REVALIDATE_SECONDS },
+      // no-store: vedi commento esteso in testa al file (fix bug #2).
+      cache: "no-store",
     });
   } catch (err) {
     throw new ApiUnavailableError(`fetch recipe "${slug}"`, { cause: err });
@@ -310,7 +322,7 @@ export async function listPublicRecipes(
 
   let res: Response;
   try {
-    res = await fetch(url, { next: { revalidate: RECIPES_REVALIDATE_SECONDS } });
+    res = await fetch(url, { cache: "no-store" });
   } catch (err) {
     throw new ApiUnavailableError("list recipes", { cause: err });
   }
@@ -544,7 +556,7 @@ export async function getPublicWorkshop(slug: string): Promise<PublicWorkshopPay
 
   let res: Response;
   try {
-    res = await fetch(url, { next: { revalidate: WORKSHOPS_REVALIDATE_SECONDS } });
+    res = await fetch(url, { cache: "no-store" });
   } catch (err) {
     throw new ApiUnavailableError(`fetch workshop "${slug}"`, { cause: err });
   }
@@ -584,7 +596,7 @@ export async function listPublicWorkshops(params: { limit?: number; offset?: num
 
   let res: Response;
   try {
-    res = await fetch(url, { next: { revalidate: WORKSHOPS_REVALIDATE_SECONDS } });
+    res = await fetch(url, { cache: "no-store" });
   } catch (err) {
     throw new ApiUnavailableError("list workshops", { cause: err });
   }
