@@ -8,7 +8,9 @@ import { Badge } from "@/components/Badge";
 import { listPublicWorkshops, resolvePublicImageUrl, type PublicWorkshopPayload } from "@/lib/aidady-api";
 import { formatDateIt, formatPriceEur } from "@/lib/format";
 
-const CANONICAL_URL = "https://nare-website.vercel.app/incontri";
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B) — mai hardcodati.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/incontri`;
 
 export const metadata: Metadata = {
   title: "Narè Incontri",

@@ -1,53 +1,41 @@
-// Typography foundation (Step 1E).
+// Typography foundation (Step 1E, riattivata Fase 9V).
 //
 // Direzione: SERIF editoriale per titoli importanti + SANS pulita per
-// body/UI. La scelta finale del font (Fase 2 - Design System) sarà
-// validata insieme alla palette definitiva.
+// body/UI.
 //
-// NOTA IMPORTANTE (Fase 1V — build): la scelta iniziale era next/font/google
-// (Fraunces + Inter), che self-hosta i font durante il build fetchandoli da
-// fonts.googleapis.com. In ambiente di sviluppo sandbox questa rete è
-// bloccata dal proxy (403), quindi il build non è verificabile qui. Per non
-// lasciare la Fase 1 senza un build verificato, si usa temporaneamente uno
-// stack di font di sistema (nessuna richiesta di rete, quindi build sempre
-// verificabile ovunque). La versione con Fraunces/Inter resta commentata
-// sotto: è la coppia raccomandata da riattivare in Fase 2, quando il build
-// avverrà in un ambiente (locale reale o Vercel) con accesso di rete
-// completo — a quel punto next/font/google funzionerà senza modifiche.
+// STORIA (per riferimento): dalla Fase 1V a tutta la Fase 8, questo file
+// usava uno stack di font di sistema (Georgia/-apple-system) invece di
+// Fraunces/Inter via next/font/google, perché l'ambiente sandbox di
+// sviluppo blocca (403) le richieste a fonts.googleapis.com necessarie al
+// self-hosting di next/font/google durante il build. Non era possibile
+// verificare qui un build con i font Google.
+//
+// Fase 9V: next/font/google è stato riattivato. Il build reale avviene su
+// Vercel (accesso di rete pieno, nessun blocco), quindi il fetch dei font
+// funziona lì senza problemi — next/font/google scarica i file font UNA
+// VOLTA in fase di build e li self-hosta come asset statici, non fa alcuna
+// richiesta runtime nel browser dell'utente (nessuna richiesta a Google
+// Fonts lato client, nessun cookie/tracking Google Fonts — privacy-safe,
+// coerente con l'audit cookie di Fase 9M).
+//
+// NOTA build sandbox: qui in sandbox `npm run build` con questa versione
+// fallirebbe per lo stesso blocco di rete storico — è un limite
+// dell'ambiente di sviluppo, non del codice. Verificato che il build reale
+// va comunque testato su Vercel (deploy automatico da GitHub) prima di
+// considerare il cambio confermato.
+import { Fraunces, Inter } from "next/font/google";
 
-export const editorialSerif = {
+export const editorialSerif = Fraunces({
+  subsets: ["latin"],
   variable: "--font-editorial-serif",
-  // Stack di sistema con buon carattere editoriale: Georgia è la serif di
-  // sistema più affidabile cross-platform per un tono "magazine".
-  style: { fontFamily: 'Georgia, "Times New Roman", Times, serif' },
-};
+  display: "swap",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
 
-export const uiSans = {
+export const uiSans = Inter({
+  subsets: ["latin"],
   variable: "--font-ui-sans",
-  style: {
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  },
-};
-
-/*
-// Versione con font Google self-hosted via next/font — da riattivare in
-// Fase 2 in un ambiente con accesso di rete a fonts.googleapis.com:
-//
-// import { Fraunces, Inter } from "next/font/google";
-//
-// export const editorialSerif = Fraunces({
-//   subsets: ["latin"],
-//   variable: "--font-editorial-serif",
-//   display: "swap",
-//   weight: ["400", "500", "600"],
-//   style: ["normal", "italic"],
-// });
-//
-// export const uiSans = Inter({
-//   subsets: ["latin"],
-//   variable: "--font-ui-sans",
-//   display: "swap",
-//   weight: ["400", "500", "600", "700"],
-// });
-*/
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});

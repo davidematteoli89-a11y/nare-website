@@ -6,7 +6,9 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { LinkButton } from "@/components/Button";
 
-const CANONICAL_URL = "https://nare-website.vercel.app/ritiri";
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B) — mai hardcodati.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/ritiri`;
 
 export const metadata: Metadata = {
   title: "Narè Ritiri",

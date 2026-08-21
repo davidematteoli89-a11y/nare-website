@@ -4,7 +4,11 @@ import { Eyebrow } from "@/components/Eyebrow";
 import { EmptyState } from "@/components/EmptyState";
 import { LinkButton } from "@/components/Button";
 
-const CANONICAL_URL = "https://nare-website.vercel.app/guide";
+// Canonical/OG url derivano da NEXT_PUBLIC_SITE_URL (Fase 9B), mai
+// hardcodati: quando verrà collegato il dominio definitivo basterà
+// cambiare quella env var, senza toccare questo file.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/guide`;
 
 export const metadata: Metadata = {
   title: "Guide & Approfondimenti",

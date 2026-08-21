@@ -9,7 +9,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { VideoCard } from "@/components/VideoCard";
 import { raiAppearances } from "@/lib/rai-appearances";
 
-const CANONICAL_URL = "https://nare-website.vercel.app/cristina";
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B) — mai hardcodati.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/cristina`;
 
 export const metadata: Metadata = {
   title: "Cristina Nigrelli — Cristina di Narè",

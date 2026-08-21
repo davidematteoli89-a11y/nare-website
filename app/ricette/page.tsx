@@ -22,9 +22,25 @@ import { listPublicRecipes, resolvePublicImageUrl, type PublicRecipePayload } fr
  * esattamente `limit` elementi (segno che potrebbero essercene altri).
  */
 
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B/9G) — mancavano del
+// tutto. Canonical punta sempre alla pagina 1 (senza query ?pagina=N):
+// le pagine successive dell'archivio non hanno contenuto sostanzialmente
+// diverso da indicizzare separatamente per Fase 9, evitando di generare
+// canonical multipli per una paginazione senza filtri/categorie reali.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/ricette`;
+const description = "L'archivio delle ricette e autoproduzioni MeLoProduco: casa, preparazioni, botanica, testate prima di essere condivise.";
+
 export const metadata: Metadata = {
   title: "Ricette & Autoproduzione",
-  description: "L'archivio delle ricette e autoproduzioni MeLoProduco: casa, preparazioni, botanica, testate prima di essere condivise.",
+  description,
+  alternates: { canonical: CANONICAL_URL },
+  openGraph: {
+    title: "Ricette & Autoproduzione",
+    description,
+    url: CANONICAL_URL,
+    type: "website",
+  },
 };
 
 const PAGE_SIZE = 12;

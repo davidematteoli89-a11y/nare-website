@@ -18,10 +18,23 @@ import { listPublicRecipes, resolvePublicImageUrl, type PublicRecipePayload } fr
  * pagina, mai un 500).
  */
 
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B/9G) — mancavano del
+// tutto (nessun alternates.canonical, nessun openGraph proprio).
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/meloproduco`;
+const description =
+  "MeLoProduco è il verticale editoriale e pratico di Narè: autoproduzione, casa, preparazioni, botanica ed economia domestica, con un metodo pubblico e trasparente.";
+
 export const metadata: Metadata = {
   title: "MeLoProduco",
-  description:
-    "MeLoProduco è il verticale editoriale e pratico di Narè: autoproduzione, casa, preparazioni, botanica ed economia domestica, con un metodo pubblico e trasparente.",
+  description,
+  alternates: { canonical: CANONICAL_URL },
+  openGraph: {
+    title: "MeLoProduco",
+    description,
+    url: CANONICAL_URL,
+    type: "website",
+  },
 };
 
 export default async function MeLoProducoPage() {

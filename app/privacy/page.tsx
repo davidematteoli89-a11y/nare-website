@@ -1,16 +1,80 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/Container";
 
-export const metadata: Metadata = { title: "Privacy" };
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-/** Pagina legale — Step 1B: skeleton. Testo reale da redigere con consulenza legale prima del go-live. */
+export const metadata: Metadata = {
+  title: "Privacy",
+  description: "Informativa privacy di Narè: quali dati raccogliamo e come vengono trattati.",
+  alternates: { canonical: `${siteUrl}/privacy` },
+};
+
+/**
+ * Pagina legale — Privacy Policy (Fase 9O).
+ *
+ * ATTENZIONE: questo NON è un testo legale definitivo. È una struttura
+ * accurata rispetto a cosa il sito raccoglie realmente oggi (verificato sul
+ * codice sorgente), pronta a ricevere i dati legali reali (titolare,
+ * indirizzo, base giuridica dettagliata, periodi di conservazione) da un
+ * consulente privacy prima del go-live. Le sezioni [DA INSERIRE] e [DA
+ * VALIDARE] sono segnaposto espliciti, non vanno rimossi né compilati con
+ * dati inventati.
+ */
 export default function PrivacyPage() {
   return (
     <Container className="max-w-2xl py-16">
       <h1 className="font-[family-name:var(--font-serif)] text-3xl text-[var(--color-foreground)]">Privacy</h1>
+
       <p className="mt-6 text-sm text-[var(--color-foreground-muted)]">
-        Testo dell&apos;informativa privacy in preparazione. Il contenuto definitivo sarà redatto prima del go-live, con
-        consulenza legale.
+        Questa informativa descrive quali dati personali raccoglie il sito Narè e come vengono trattati. Il testo
+        legale definitivo sarà completato con l&apos;assistenza di un consulente privacy prima del go-live: le parti
+        contrassegnate [DA INSERIRE] o [DA VALIDARE] non sono ancora definitive.
+      </p>
+
+      <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Titolare del trattamento</h2>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        [DA INSERIRE: titolare del trattamento] · [DA INSERIRE: indirizzo] · [DA INSERIRE: email privacy]
+      </p>
+
+      <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Dati raccolti tramite la newsletter</h2>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        Se ti iscrivi alla newsletter Narè, raccogliamo: indirizzo email (obbligatorio), nome (facoltativo), e il
+        consenso esplicito che presti tramite l&apos;apposita casella (mai preselezionata) al momento dell&apos;iscrizione.
+        L&apos;invio del modulo passa dal nostro server verso Brevo (fornitore del servizio di invio email), che
+        conserva questi dati per gestire l&apos;invio delle comunicazioni. La chiave di accesso a Brevo resta privata
+        e non è mai esposta nel browser. L&apos;iscrizione è a conferma semplice: dopo l&apos;iscrizione ricevi
+        un&apos;unica email di conferma, senza ulteriori passaggi. Puoi cancellarti in qualsiasi momento tramite il
+        link presente in ogni email che ricevi.
+      </p>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        [DA VALIDARE: base giuridica del trattamento (consenso), periodo di conservazione dei dati di iscrizione,
+        eventuale trasferimento extra-UE dei dati verso i server di Brevo e relative garanzie contrattuali (SCC).]
+      </p>
+
+      <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Analisi statistiche</h2>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        Utilizziamo Vercel Web Analytics per raccogliere statistiche aggregate e anonime sulle visite al sito, senza
+        cookie né identificatori persistenti in grado di riconoscere un singolo visitatore. Maggiori dettagli nella{" "}
+        <a href="/cookie" className="text-[var(--color-accent-text)] underline underline-offset-4">
+          pagina Cookie
+        </a>
+        .
+      </p>
+
+      <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">I tuoi diritti</h2>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        [DA VALIDARE: elenco completo dei diritti dell&apos;interessato (accesso, rettifica, cancellazione,
+        limitazione, portabilità, opposizione) e modalità concrete per esercitarli, da definire con il consulente
+        privacy.]
+      </p>
+
+      <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Cookie</h2>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        Per il dettaglio delle tecnologie di tracciamento usate dal sito, vedi la{" "}
+        <a href="/cookie" className="text-[var(--color-accent-text)] underline underline-offset-4">
+          Cookie Policy
+        </a>
+        .
       </p>
     </Container>
   );

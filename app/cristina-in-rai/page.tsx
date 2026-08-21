@@ -6,7 +6,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { VideoCard } from "@/components/VideoCard";
 import { raiAppearances } from "@/lib/rai-appearances";
 
-const CANONICAL_URL = "https://nare-website.vercel.app/cristina-in-rai";
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B) — mai hardcodati.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/cristina-in-rai`;
 
 export const metadata: Metadata = {
   title: "Cristina in RAI",
@@ -50,7 +52,7 @@ export default function CristinaInRaiPage() {
       name: a.title,
       description: a.description ?? `${a.title} — ${a.programme}`,
       uploadDate: a.date,
-      thumbnailUrl: a.poster ? `https://nare-website.vercel.app${a.poster}` : undefined,
+      thumbnailUrl: a.poster ? `${siteUrl}${a.poster}` : undefined,
       contentUrl: a.videoUrl,
     }));
 

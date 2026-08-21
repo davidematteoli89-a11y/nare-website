@@ -9,11 +9,13 @@ import { subscribeToNewsletter, type NewsletterSubmitResult } from "@/lib/newsle
 const initialState: NewsletterSubmitResult | null = null;
 
 /**
- * Form newsletter reale — Fase 8, Step 8P/8Q/8F/8L.
+ * Form newsletter reale — Fase 8, Step 8P/8Q/8F/8L. Audit consenso
+ * confermato in Fase 9P (nessuna modifica al flusso necessaria).
  *
- * Collegato a lib/newsletter-actions.ts (Server Action) → Brevo,
- * double opt-in (Step 8G). Nessuna API key nel client: il form invoca
- * solo la Server Action, che gira interamente sul server.
+ * Collegato a lib/newsletter-actions.ts (Server Action) → Brevo, single
+ * opt-in + email di conferma semplice (vedi lib/brevo.ts per la
+ * cronologia completa). Nessuna API key nel client: il form invoca solo
+ * la Server Action, che gira interamente sul server.
  *
  * Campi (Step 8F): email (obbligatoria), nome (opzionale, solo in forma
  * non-compact), consenso privacy (obbligatorio, checkbox MAI

@@ -3,7 +3,9 @@ import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { NewsletterFormShell } from "@/components/NewsletterFormShell";
 
-const CANONICAL_URL = "https://nare-website.vercel.app/newsletter";
+// Canonical/OG url da NEXT_PUBLIC_SITE_URL (Fase 9B) — mai hardcodati.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const CANONICAL_URL = `${siteUrl}/newsletter`;
 
 export const metadata: Metadata = {
   title: "Newsletter",
