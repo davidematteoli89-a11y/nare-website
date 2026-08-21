@@ -226,6 +226,24 @@ function MeLoProducoSection({ recipes }: { recipes: Awaited<ReturnType<typeof sa
           </div>
         )}
       </div>
+
+      {/* CTA discovery leggera (Fase 11, Step 11X) — unico punto della Home
+          dove si inserisce con naturalezza, subito sotto la sezione
+          MeLoProduco che il visitatore ha appena visto: prosegue lo stesso
+          discorso ("ecco le ricette" → "scopri cosa puoi fare con quello
+          che hai già"), senza aggiungere una sezione a sé stante che
+          appesantirebbe la Home. */}
+      <div className="mt-8 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-subtle)] p-6 text-center sm:p-8">
+        <p className="text-h3 text-[var(--color-foreground)]">Hai già qualcosa in casa?</p>
+        <p className="text-small mx-auto mt-2 max-w-md text-[var(--color-foreground-muted)]">
+          Scopri cosa puoi fare con quello che hai già a disposizione.
+        </p>
+        <div className="mt-4">
+          <LinkButton href="/meloproduco/cosa-hai-in-casa" variant="secondary" size="sm">
+            Scopri cosa puoi produrre
+          </LinkButton>
+        </div>
+      </div>
     </Container>
   );
 }

@@ -79,6 +79,59 @@ export interface PublicRecipeStep {
 // audit trail, costi, stato workflow interno, category/tag) non è mai
 // presente nella risposta pubblica: non va aggiunto a questo tipo "a scopo
 // di comodo", perché significherebbe assumere un campo che l'API non dà.
+// Blocco Discovery (Fase 11, Step 11L-11N) — nuovo campo `discovery` sul
+// DTO pubblico Recipe. Compilato manualmente da un editor umano in
+// backoffice: oggi (21/08/2026) probabilmente NESSUNA ricetta pubblicata ha
+// ancora questi dati (categoria/tag/materiali/percorsi sono tutti opzionali
+// lato backend). Un blocco vuoto (category: null, tags: [], materials: [],
+// paths: [], difficulty: null, time_minutes: null, cost_level: null,
+// season: null) è quindi uno stato NORMALE, non un errore — ogni pagina che
+// legge questo campo deve gestirlo con eleganza (vedi extractAvailableFilters
+// e le pagine discovery sotto app/meloproduco/).
+export interface PublicDiscoveryTag {
+  kind: "theme" | "need" | "environment" | "context";
+  slug: string;
+  name: string;
+}
+
+export interface PublicDiscoveryMaterial {
+  slug: string;
+  name: string;
+  required: boolean;
+}
+
+export interface PublicDiscoveryPath {
+  slug: string;
+  title: string;
+}
+
+export type RecipeDifficulty = "facile" | "media" | "avanzata";
+export type RecipeCostLevel = "basso" | "medio" | "alto";
+export type RecipeSeason = "tutto_l_anno" | "primavera" | "estate" | "autunno" | "inverno" | "festivita";
+
+export interface PublicDiscoveryBlock {
+  category: { slug: string; name: string } | null;
+  tags: PublicDiscoveryTag[];
+  materials: PublicDiscoveryMaterial[];
+  paths: PublicDiscoveryPath[];
+  difficulty: RecipeDifficulty | null;
+  time_minutes: number | null;
+  cost_level: RecipeCostLevel | null;
+  season: RecipeSeason | null;
+}
+
+/** Blocco discovery "vuoto" di default — usato per retrocompatibilità quando un payload (es. da cache stale) non include ancora `discovery`. */
+const EMPTY_DISCOVERY: PublicDiscoveryBlock = {
+  category: null,
+  tags: [],
+  materials: [],
+  paths: [],
+  difficulty: null,
+  time_minutes: null,
+  cost_level: null,
+  season: null,
+};
+
 export interface PublicRecipePayload {
   slug: string;
   title: string;
@@ -93,6 +146,20 @@ export interface PublicRecipePayload {
   canonical_url: string | null;
   og_image_path: string | null;
   published_at: string | null;
+  discovery: PublicDiscoveryBlock;
+}
+
+/** Filtri opzionali accettati da GET /api/public/[orgSlug]/recipes (Fase 11, Step 11L). Tutti gli slug sono whitelisted lato server (regex ^[a-z0-9-]+$); valori non validi tornano 400 — qui passiamo solo ciò che l'utente ha selezionato in UI, già negli enum/slug corretti. */
+export interface RecipeDiscoveryFilters {
+  category?: string;
+  need?: string;
+  environment?: string;
+  context?: string;
+  material?: string;
+  path?: string;
+  difficulty?: RecipeDifficulty;
+  cost?: RecipeCostLevel;
+  season?: RecipeSeason;
 }
 
 export interface PublicRecipeListResponse {
@@ -130,8 +197,17 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** Validazione runtime leggera — non un validatore esaustivo, solo una guardia contro risposte palesemente malformate. */
-function isPublicRecipePayload(value: unknown): value is PublicRecipePayload {
+/**
+ * Validazione runtime leggera — non un validatore esaustivo, solo una
+ * guardia contro risposte palesemente malformate.
+ *
+ * Nota retrocompatibilità (Fase 11, Step 11L): il campo `discovery` NON è
+ * richiesto qui per considerare il payload valido — una risposta cache
+ * stale precedente alla Fase 11 potrebbe non averlo ancora. `normalize...`
+ * sotto applica poi un default vuoto, così il resto del codice può sempre
+ * assumere che `discovery` esista.
+ */
+function isPublicRecipePayload(value: unknown): value is Omit<PublicRecipePayload, "discovery"> & { discovery?: unknown } {
   if (!isPlainObject(value)) return false;
   return (
     typeof value.slug === "string" &&
@@ -141,7 +217,22 @@ function isPublicRecipePayload(value: unknown): value is PublicRecipePayload {
   );
 }
 
-function isPublicRecipeListResponse(value: unknown): value is PublicRecipeListResponse {
+function isPublicDiscoveryBlock(value: unknown): value is PublicDiscoveryBlock {
+  if (!isPlainObject(value)) return false;
+  return Array.isArray(value.tags) && Array.isArray(value.materials) && Array.isArray(value.paths);
+}
+
+/** Applica il default `discovery` vuoto se il payload grezzo non lo include o è malformato — mai crashare per questo campo opzionale/aggiuntivo. */
+function normalizeRecipePayload(raw: Omit<PublicRecipePayload, "discovery"> & { discovery?: unknown }): PublicRecipePayload {
+  return {
+    ...raw,
+    discovery: isPublicDiscoveryBlock(raw.discovery) ? raw.discovery : EMPTY_DISCOVERY,
+  };
+}
+
+function isPublicRecipeListResponse(
+  value: unknown
+): value is { items: (Omit<PublicRecipePayload, "discovery"> & { discovery?: unknown })[]; limit: number; offset: number } {
   if (!isPlainObject(value)) return false;
   if (!Array.isArray(value.items)) return false;
   return value.items.every(isPublicRecipePayload);
@@ -187,7 +278,7 @@ export async function getPublicRecipe(slug: string): Promise<PublicRecipePayload
     throw new MalformedResponseError(`recipe "${slug}" → shape inattesa`);
   }
 
-  return json;
+  return normalizeRecipePayload(json);
 }
 
 /**
@@ -199,10 +290,21 @@ export async function getPublicRecipe(slug: string): Promise<PublicRecipePayload
  * Le pagine chiamanti sono responsabili di catturare questi errori e
  * mostrare un fallback editoriale (mai propagare un errore tecnico in UI).
  */
-export async function listPublicRecipes(params: { limit?: number; offset?: number } = {}): Promise<PublicRecipeListResponse> {
+export async function listPublicRecipes(
+  params: { limit?: number; offset?: number } & RecipeDiscoveryFilters = {}
+): Promise<PublicRecipeListResponse> {
   const search = new URLSearchParams();
   if (params.limit) search.set("limit", String(params.limit));
   if (params.offset) search.set("offset", String(params.offset));
+  if (params.category) search.set("category", params.category);
+  if (params.need) search.set("need", params.need);
+  if (params.environment) search.set("environment", params.environment);
+  if (params.context) search.set("context", params.context);
+  if (params.material) search.set("material", params.material);
+  if (params.path) search.set("path", params.path);
+  if (params.difficulty) search.set("difficulty", params.difficulty);
+  if (params.cost) search.set("cost", params.cost);
+  if (params.season) search.set("season", params.season);
 
   const url = `${getBaseUrl()}/api/public/${ORG_SLUG}/recipes${search.size ? `?${search}` : ""}`;
 
@@ -228,7 +330,114 @@ export async function listPublicRecipes(params: { limit?: number; offset?: numbe
     throw new MalformedResponseError("list recipes → shape inattesa");
   }
 
-  return json;
+  return { ...json, items: json.items.map(normalizeRecipePayload) };
+}
+
+/**
+ * Recupera TUTTE le Recipe pubblicate, non solo una pagina (Fase 11, Step
+ * 11Q/11R/11U/11AA). Serve per: matching "Cosa hai in casa", ricerca
+ * client-side, ed extractAvailableFilters. Pagina in blocchi di 50 (il
+ * massimo consentito da limit, vedi commento di testa al file) finché
+ * l'API non restituisce meno di 50 elementi.
+ *
+ * Assunzione di performance (Step 11AA), documentata invece di
+ * over-ingegnerizzare: oggi il catalogo MeLoProduco è piccolo (poche decine
+ * di ricette), quindi caricare tutto in memoria e fare matching/ricerca
+ * client-side è accettabile. Next.js dedupe automaticamente le richieste
+ * identiche entro la finestra di revalidate (30s), quindi più pagine che
+ * chiamano questa funzione nello stesso ciclo di revalidate non generano
+ * fetch multipli reali verso aiDady. Se il catalogo crescesse molto (centinaia
+ * di ricette), questo approccio andrebbe rivisto con filtri sempre
+ * server-side e niente fetch-all — fuori scope oggi.
+ */
+export async function listAllPublicRecipes(filters: RecipeDiscoveryFilters = {}): Promise<PublicRecipePayload[]> {
+  const PAGE_SIZE = 50;
+  const all: PublicRecipePayload[] = [];
+  let offset = 0;
+
+  for (;;) {
+    const res = await listPublicRecipes({ ...filters, limit: PAGE_SIZE, offset });
+    all.push(...res.items);
+    if (res.items.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+    // Guardia di sicurezza: non superare 1000 ricette in un solo fetch-all,
+    // per non generare loop infiniti se l'API rispondesse sempre con
+    // esattamente PAGE_SIZE elementi per un bug lato server.
+    if (offset >= 1000) break;
+  }
+
+  return all;
+}
+
+/**
+ * Deriva dinamicamente le opzioni di filtro disponibili scansionando le
+ * ricette effettivamente caricate (Fase 11, Step 11L/11S/11T) — la Public
+ * API di aiDady non espone oggi un endpoint dedicato "lista tassonomia",
+ * quindi le opzioni mostrate in UI vengono ricavate dai dati reali già
+ * presenti, non hardcodate: se una categoria non ha ancora nessuna ricetta
+ * assegnata, semplicemente non compare come filtro (niente filtri "morti").
+ */
+export interface AvailableFilters {
+  categories: { slug: string; name: string }[];
+  needs: { slug: string; name: string }[];
+  environments: { slug: string; name: string }[];
+  contexts: { slug: string; name: string }[];
+  materials: { slug: string; name: string }[];
+  paths: { slug: string; title: string }[];
+  difficulties: RecipeDifficulty[];
+  costLevels: RecipeCostLevel[];
+  seasons: RecipeSeason[];
+}
+
+export function extractAvailableFilters(recipes: PublicRecipePayload[]): AvailableFilters {
+  const categories = new Map<string, string>();
+  const needs = new Map<string, string>();
+  const environments = new Map<string, string>();
+  const contexts = new Map<string, string>();
+  const materials = new Map<string, string>();
+  const paths = new Map<string, string>();
+  const difficulties = new Set<RecipeDifficulty>();
+  const costLevels = new Set<RecipeCostLevel>();
+  const seasons = new Set<RecipeSeason>();
+
+  for (const recipe of recipes) {
+    const d = recipe.discovery;
+    if (d.category) categories.set(d.category.slug, d.category.name);
+    for (const tag of d.tags) {
+      if (tag.kind === "need") needs.set(tag.slug, tag.name);
+      else if (tag.kind === "environment") environments.set(tag.slug, tag.name);
+      else if (tag.kind === "context") contexts.set(tag.slug, tag.name);
+      // kind "theme" non ha un filtro dedicato in questa fase (nessuno slot nello spec 11S/11T).
+    }
+    for (const material of d.materials) materials.set(material.slug, material.name);
+    for (const path of d.paths) paths.set(path.slug, path.title);
+    if (d.difficulty) difficulties.add(d.difficulty);
+    if (d.cost_level) costLevels.add(d.cost_level);
+    if (d.season) seasons.add(d.season);
+  }
+
+  const toSortedList = (m: Map<string, string>) =>
+    Array.from(m.entries())
+      .map(([slug, name]) => ({ slug, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, "it"));
+
+  const difficultyOrder: RecipeDifficulty[] = ["facile", "media", "avanzata"];
+  const costOrder: RecipeCostLevel[] = ["basso", "medio", "alto"];
+  const seasonOrder: RecipeSeason[] = ["tutto_l_anno", "primavera", "estate", "autunno", "inverno", "festivita"];
+
+  return {
+    categories: toSortedList(categories),
+    needs: toSortedList(needs),
+    environments: toSortedList(environments),
+    contexts: toSortedList(contexts),
+    materials: toSortedList(materials),
+    paths: Array.from(paths.entries())
+      .map(([slug, title]) => ({ slug, title }))
+      .sort((a, b) => a.title.localeCompare(b.title, "it")),
+    difficulties: difficultyOrder.filter((d) => difficulties.has(d)),
+    costLevels: costOrder.filter((c) => costLevels.has(c)),
+    seasons: seasonOrder.filter((s) => seasons.has(s)),
+  };
 }
 
 /**

@@ -44,6 +44,20 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            {/* Fase 11, Step 11W/11X: nuovi accessi discovery — Percorsi e
+                "Cosa hai in casa" raggiungibili dal footer, senza affollare
+                l'header principale (stesso criterio già usato per
+                Ritiri/Famiglie/In Viaggio, vedi nota Fase 6 sopra). */}
+            <li>
+              <Link href="/meloproduco/percorsi" className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
+                Percorsi
+              </Link>
+            </li>
+            <li>
+              <Link href="/meloproduco/cosa-hai-in-casa" className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
+                Cosa hai in casa
+              </Link>
+            </li>
           </ul>
         </div>
 
