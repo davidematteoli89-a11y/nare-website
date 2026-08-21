@@ -62,7 +62,9 @@ export default function CristinaInRaiPage() {
         <Breadcrumbs items={[{ label: "Narè", href: "/" }, { label: "Cristina", href: "/cristina" }, { label: "In RAI" }]} />
 
         <div className="mt-6">
+          {/* as="h1" (Fase 9 post-deploy QA): unica intestazione di pagina. */}
           <SectionHeader
+            as="h1"
             eyebrow="Media"
             title="Cristina in RAI"
             description="Gli interventi di Cristina a Uno Mattina e Uno Mattina Estate, su Rai1."

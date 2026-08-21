@@ -58,7 +58,10 @@ export default async function RicettePage({
 
   return (
     <Container className="py-16 sm:py-20">
+      {/* as="h1" (Fase 9 post-deploy QA): questa è l'unica intestazione
+          della pagina, deve essere un H1 semantico reale. */}
       <SectionHeader
+        as="h1"
         eyebrow="MeLoProduco"
         title="Ricette & Autoproduzione"
         description="L'archivio delle ricette e preparazioni MeLoProduco: pratiche quotidiane studiate con criterio e testate prima di essere condivise."

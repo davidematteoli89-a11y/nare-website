@@ -53,7 +53,9 @@ export default async function IncontriPage() {
   return (
     <>
       <Container className="py-16 sm:py-20">
+        {/* as="h1" (Fase 9 post-deploy QA): unica intestazione di pagina. */}
         <SectionHeader
+          as="h1"
           eyebrow="Dal vivo"
           title="Narè Incontri"
           description="Laboratori e giornate dal vivo per imparare facendo, insieme a Cristina: stessa cura e stesso metodo di tutto Narè, applicati all'esperienza dal vivo."
