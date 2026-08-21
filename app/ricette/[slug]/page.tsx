@@ -14,6 +14,20 @@ import {
   type PublicRecipePayload,
 } from "@/lib/aidady-api";
 
+// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
+// questa pagina non usa searchParams, quindi senza una direttiva esplicita
+// Next.js può trattarla come statica e servirla dalla Full Route Cache
+// indipendentemente dal `next: { revalidate: 30 }` impostato sul fetch
+// interno in lib/aidady-api.ts (stesso principio del fix già applicato alle
+// Route Handler pubbliche di aiDady in ab9abda, ma qui sul lato Narè).
+// Verificato end-to-end: dopo un unpublish reale confermato in aiDady (e
+// confermato che la Public API rispondeva già 404 con x-vercel-cache:
+// MISS), la pagina Narè continuava a mostrare la Brioche al Burro ben oltre
+// i 30s dichiarati. `revalidate = 30` a livello di pagina allinea
+// esplicitamente la Route Cache al TTL dei dati (ISR), invece di lasciare
+// che Next.js decida autonomamente se/quando invalidare l'HTML pre-generato.
+export const revalidate = 30;
+
 /**
  * Dettaglio Recipe definitivo — Fase 3, Step 3F-3M.
  *

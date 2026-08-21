@@ -17,6 +17,10 @@ import { formatDateIt, formatPriceEur } from "@/lib/format";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
+// vedi commento esteso in app/ricette/[slug]/page.tsx.
+export const revalidate = 30;
+
 /**
  * Dettaglio Narè Incontri definitivo — Fase 5, Step 5H-5L.
  *

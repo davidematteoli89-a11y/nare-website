@@ -15,6 +15,13 @@ import {
   type RecipeDiscoveryFilters,
 } from "@/lib/aidady-api";
 
+// BUG FIX (Fase 11, audit end-to-end unpublish — difesa in profondità):
+// questa pagina legge già `searchParams`, quindi Next.js la rende dinamica
+// per definizione — ma la direttiva esplicita allinea comunque il TTL della
+// Route Cache al fetch cache, invece di lasciare il comportamento implicito
+// (vedi commento esteso in app/ricette/[slug]/page.tsx).
+export const revalidate = 30;
+
 /**
  * Archivio /ricette definitivo — Fase 3 (Step 3D/3E) + Fase 11 (Step 11T:
  * filtri discovery reali).

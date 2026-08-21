@@ -6,6 +6,11 @@ import { EmptyState } from "@/components/EmptyState";
 import { ExploraClient } from "@/components/discovery/ExploraClient";
 import { listAllPublicRecipes, extractAvailableFilters, type PublicRecipePayload, type AvailableFilters } from "@/lib/aidady-api";
 
+// BUG FIX (Fase 11, audit end-to-end unpublish — difesa in profondità):
+// vedi commento in app/ricette/page.tsx e commento esteso in
+// app/ricette/[slug]/page.tsx.
+export const revalidate = 30;
+
 /**
  * /meloproduco/esplora — Step 11S.
  *

@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
+// BUG FIX (Fase 11, audit end-to-end unpublish — secondo layer del bug):
+// vedi commento esteso in app/ricette/[slug]/page.tsx.
+export const revalidate = 30;
+
 /**
  * /cerca — Step 11U: ricerca reale attivata (in precedenza solo UI
  * placeholder, Step 1B). Client-side, niente LLM/ricerca semantica —
