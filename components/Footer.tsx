@@ -69,6 +69,15 @@ export function Footer() {
                 Newsletter
               </Link>
             </li>
+            {/* Fase 12, Step 12X: CTA lead gen discreta, stesso stile testuale
+                delle altre voci — non deve competere visivamente con
+                Newsletter, quindi nessun bottone/badge, solo un link in più
+                nella stessa lista. */}
+            <li>
+              <Link href="/porta-nare-da-te" className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
+                Porta Narè da te
+              </Link>
+            </li>
             {/* Instagram/social: nessun URL placeholder inventato (vincolo Fase 1H/2G).
                 Va aggiunto qui solo quando esisterà un link reale confermato. */}
           </ul>

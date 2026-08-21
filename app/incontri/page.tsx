@@ -5,6 +5,7 @@ import { Container } from "@/components/Container";
 import { SectionHeader } from "@/components/SectionHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/Badge";
+import { LinkButton } from "@/components/Button";
 import { listPublicWorkshops, resolvePublicImageUrl, type PublicWorkshopPayload } from "@/lib/aidady-api";
 import { formatDateIt, formatPriceEur } from "@/lib/format";
 
@@ -113,6 +114,17 @@ export default async function IncontriPage() {
           </div>
         </Container>
       </div>
+
+      {/* CTA lead gen (Fase 12, Step 12C) */}
+      <Container className="py-14 text-center sm:py-16">
+        <SectionHeader
+          className="mx-auto max-w-lg items-center text-center [&>div]:mx-auto"
+          title="Vuoi organizzare un incontro Narè?"
+        />
+        <div className="mt-5">
+          <LinkButton href="/porta-nare-da-te?tipo=incontro">Porta Narè da te</LinkButton>
+        </div>
+      </Container>
     </>
   );
 }

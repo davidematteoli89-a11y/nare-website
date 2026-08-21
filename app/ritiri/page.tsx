@@ -111,6 +111,19 @@ export default function RitiriPage() {
           </LinkButton>
         </div>
       </Container>
+
+      {/* CTA lead gen (Fase 12, Step 12C) */}
+      <div className="bg-[var(--color-surface-subtle)]">
+        <Container className="py-14 text-center sm:py-16">
+          <SectionHeader
+            className="mx-auto max-w-lg items-center text-center [&>div]:mx-auto"
+            title="Stai immaginando un ritiro o un'esperienza di più giorni?"
+          />
+          <div className="mt-5">
+            <LinkButton href="/porta-nare-da-te?tipo=ritiro">Porta Narè da te</LinkButton>
+          </div>
+        </Container>
+      </div>
     </>
   );
 }

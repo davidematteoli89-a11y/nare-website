@@ -100,6 +100,19 @@ export default function FamigliePage() {
           </LinkButton>
         </div>
       </Container>
+
+      {/* CTA lead gen (Fase 12, Step 12C) */}
+      <div className="bg-[var(--color-surface-subtle)]">
+        <Container className="py-14 text-center sm:py-16">
+          <SectionHeader
+            className="mx-auto max-w-lg items-center text-center [&>div]:mx-auto"
+            title="Vuoi portare Narè nella tua scuola, associazione o gruppo?"
+          />
+          <div className="mt-5">
+            <LinkButton href="/porta-nare-da-te?tipo=famiglie">Porta Narè da te</LinkButton>
+          </div>
+        </Container>
+      </div>
     </>
   );
 }

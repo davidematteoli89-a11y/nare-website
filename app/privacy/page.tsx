@@ -63,6 +63,27 @@ export default function PrivacyPage() {
         eventuale trasferimento extra-UE dei dati verso i server di Brevo e relative garanzie contrattuali (SCC).]
       </p>
 
+      <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Dati raccolti tramite il modulo &quot;Porta Narè da te&quot;</h2>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        Se compili il modulo di richiesta nella pagina{" "}
+        <a href="/porta-nare-da-te" className="text-[var(--color-accent-text)] underline underline-offset-4">
+          Porta Narè da te
+        </a>{" "}
+        (o nelle CTA presenti su Narè Incontri, Ritiri, Famiglie e In Viaggio), raccogliamo: nome (obbligatorio),
+        cognome (facoltativo), email (obbligatoria), telefono (facoltativo), città e regione/provincia, il tipo di
+        richiesta e i dettagli che ci fornisci (numero indicativo di persone, periodo o data desiderata, interessi,
+        messaggio libero), oltre al consenso esplicito che presti tramite l&apos;apposita casella (mai preselezionata).
+        Questi dati vengono trasmessi dal nostro server al gestionale interno di MeLoProduco per essere gestiti da
+        Cristina in vista di un eventuale contatto — non vengono mai inviati direttamente dal tuo browser. Dopo
+        l&apos;invio riceverai un&apos;email di ricevuta che conferma solo che abbiamo ricevuto la richiesta, senza
+        alcuna promessa di tempi di risposta specifici.
+      </p>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        [DA VALIDARE: base giuridica del trattamento (consenso/esecuzione di misure precontrattuali su richiesta
+        dell&apos;interessato), periodo di conservazione dei dati della richiesta e dei contatti creati nel gestionale
+        interno.]
+      </p>
+
       <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Analisi statistiche</h2>
       <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
         Utilizziamo Vercel Web Analytics per raccogliere statistiche aggregate e anonime sulle visite al sito, senza

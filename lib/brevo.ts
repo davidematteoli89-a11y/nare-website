@@ -392,3 +392,67 @@ export async function sendWelcomeEmail(params: { apiKey: string; email: string; 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+/**
+ * Fase 12 — Lead Generation "Porta Narè da te": email transazionale di
+ * ricevuta dopo l'invio del form (Step 12U, deciso esplicitamente con
+ * l'utente: implementarla subito, riusando lo stesso pattern sicuro già
+ * in produzione per la newsletter).
+ *
+ * Differenza deliberata rispetto a sendWelcomeEmail: qui il contenuto è
+ * HTML inline via il parametro `htmlContent` di /v3/smtp/email, non un
+ * templateId Brevo — creare un nuovo template richiederebbe accesso
+ * diretto al pannello Brevo (fuori portata di questa sessione), mentre
+ * l'HTML inline usa solo BREVO_API_KEY, già configurata e verificata in
+ * produzione per la newsletter. Nessun tracking, nessun link di
+ * disiscrizione: è una ricevuta puramente transazionale, non marketing.
+ *
+ * Il fallimento di questo invio non deve mai far apparire fallita la
+ * richiesta lead (già salvata in aiDady prima di questa chiamata): errore
+ * solo loggato server-side, mai propagato al client (stesso principio di
+ * sendWelcomeEmail).
+ */
+export async function sendLeadReceiptEmail(params: { apiKey: string; email: string; firstName: string }): Promise<void> {
+  const { apiKey, email, firstName } = params;
+
+  const safeFirstName = firstName.replace(/[<>&]/g, "");
+  const html = `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #2a2a28;">
+      <p>Ciao ${safeFirstName || ""},</p>
+      <p>Grazie, abbiamo ricevuto la tua richiesta.</p>
+      <p>Ci hai raccontato il punto di partenza. Da qui possiamo capire insieme se e come costruire qualcosa.</p>
+      <p>A presto,<br/>Narè</p>
+    </div>
+  `.trim();
+
+  let res: Response;
+  try {
+    res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "api-key": apiKey,
+      },
+      body: JSON.stringify({
+        to: [{ email, name: safeFirstName || undefined }],
+        sender: { name: "Narè", email: process.env.BREVO_SENDER_EMAIL || "no-reply@nare.example" },
+        subject: "Abbiamo ricevuto la tua richiesta — Narè",
+        htmlContent: html,
+      }),
+    });
+  } catch (err) {
+    console.error("[porta-nare-da-te] Brevo smtp/email network error:", err instanceof Error ? err.message : err);
+    return;
+  }
+
+  if (res.status === 201) return;
+
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+  console.error(`[porta-nare-da-te] Brevo smtp/email ${res.status}:`, JSON.stringify(body));
+}
