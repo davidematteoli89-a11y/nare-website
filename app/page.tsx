@@ -78,8 +78,8 @@ function Hero() {
         </div>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)]">
           <Image
-            src="/images/cristina/cristina-hero.jpg"
-            alt="Cristina Nigrelli, di Narè, ritratto all'aperto"
+            src="/images/cristina/cristina-home-hero.jpg"
+            alt="Cristina Nigrelli, di Narè, sorridente in un campo di lavanda"
             fill
             priority
             sizes="(min-width: 1024px) 50vw, 100vw"
