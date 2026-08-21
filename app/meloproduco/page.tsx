@@ -184,7 +184,10 @@ function Metodo() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* GUIDE — solo se non sembra un placeholder rotto (Step 3C.5)             */
+/* GUIDE — Fase 7, Step 7M: 0 Guide reali pubblicate oggi (nessun endpoint */
+/* pubblico ancora esposto da aiDady, vedi app/guide/page.tsx), quindi il  */
+/* blocco resta un rimando editoriale leggero — ma ora punta alla pagina   */
+/* /guide reale, che esiste da questa fase (Step 3C.5 → Step 7M).          */
 /* ---------------------------------------------------------------------- */
 
 function Guide() {
@@ -195,6 +198,11 @@ function Guide() {
         <p className="text-small mx-auto mt-2 max-w-md text-[var(--color-foreground-muted)]">
           Accanto alle ricette, MeLoProduco ospiterà in futuro guide più ampie su casa, autoproduzione e botanica.
         </p>
+        <div className="mt-5">
+          <LinkButton href="/guide" variant="secondary" size="sm">
+            Vai alle Guide
+          </LinkButton>
+        </div>
       </div>
     </Container>
   );
