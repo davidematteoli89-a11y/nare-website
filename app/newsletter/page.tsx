@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
-import { BrevoNewsletterIframe } from "@/components/BrevoNewsletterIframe";
+import { NewsletterFormShell } from "@/components/NewsletterFormShell";
 
 const CANONICAL_URL = "https://nare-website.vercel.app/newsletter";
 
@@ -20,10 +20,15 @@ export const metadata: Metadata = {
 /**
  * /newsletter — pagina definitiva (Fase 8, Step 8Q).
  *
- * ⚠️ Aggiornamento 21 ago 2026: il form è ora l'iframe nativo Brevo
- * (BrevoNewsletterIframe) invece del form custom NewsletterFormShell —
- * vedi la nota completa in components/BrevoNewsletterIframe.tsx per il
- * motivo del cambio (double opt-in via API bloccato lato Brevo).
+ * ⚠️ Aggiornamento 21 ago 2026: dopo un breve test con l'iframe nativo
+ * Brevo (BrevoNewsletterIframe, non più usato qui — vedi il file per la
+ * cronologia), si è tornati al form custom NewsletterFormShell per avere
+ * UN SOLO flusso di iscrizione coerente con Home/MobileNav: stesso
+ * componente, stesso design system Narè, stessa Server Action
+ * (lib/newsletter-actions.ts → subscribeSingleOptIn in lib/brevo.ts).
+ * L'iframe non aveva più un vantaggio tecnico reale una volta verificato
+ * che subscribeSingleOptIn funziona indipendentemente dal problema DOI
+ * che aveva bloccato inizialmente l'integrazione.
  *
  * Nessuna promessa di frequenza specifica (Step 8Q: "non decisa") — il
  * copy descrive solo cosa arriverà, non quando/quanto spesso.
@@ -39,8 +44,8 @@ export default function NewsletterPage() {
           progetti in arrivo.
         </p>
 
-        <div className="mt-10">
-          <BrevoNewsletterIframe />
+        <div className="mt-10 text-left">
+          <NewsletterFormShell />
         </div>
 
         <p className="text-meta mt-6 text-[var(--color-foreground-muted)]">
