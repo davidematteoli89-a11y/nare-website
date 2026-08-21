@@ -1,34 +1,69 @@
 import "server-only";
 
 /**
- * Client minimale per le API PUBBLICHE di aiDady (Step 1L).
+ * Client minimale per le API PUBBLICHE di aiDady (Step 1L, rafforzato in
+ * Fase 3 — Step 3A/3B).
  *
  * Vincoli assoluti:
  * - NESSUNA credenziale Supabase (né anon key né service key) è usata qui.
  * - NESSUN accesso a tabelle private: solo fetch HTTP verso gli endpoint
  *   pubblici già esposti da aiDady sotto /api/public/[orgSlug]/...
  * - Nessun endpoint viene inventato: gli endpoint qui sotto rispecchiano
- *   esattamente ciò che esiste in aiDady al momento della Fase 1 —
- *   GET /api/public/[orgSlug]/recipes (lista) e
- *   GET /api/public/[orgSlug]/recipes/[slug] (dettaglio), vedi
- *   app/api/public/[orgSlug]/recipes/route.ts e .../[slug]/route.ts nel
- *   repository aiDady. Anche se l'endpoint lista esiste già, l'archivio
- *   /ricette resta un placeholder statico in questa fase (Step 1B/1I):
- *   il collegamento reale dei dati è demandato alla Fase 2, per non
- *   anticipare qui contenuti/logica di presentazione dell'archivio.
+ *   esattamente ciò che esiste in aiDady — GET /api/public/[orgSlug]/recipes
+ *   (lista) e GET /api/public/[orgSlug]/recipes/[slug] (dettaglio).
+ *
+ * Verifica Fase 3 (Step 3A), fatta leggendo il codice sorgente reale di
+ * aiDady (non assunta):
+ * - app/api/public/[orgSlug]/recipes/route.ts → GET, query params
+ *   `limit` (1-50, default 20) e `offset` (>=0, default 0). Risposta:
+ *   `{ items: PublicRecipePayload[], limit: number, offset: number }`.
+ *   NESSUN campo `total`/`count`: non è possibile calcolare un numero di
+ *   pagine reale, solo "ci sono altri risultati?" in base a items.length.
+ * - app/api/public/[orgSlug]/recipes/[slug]/route.ts → GET singola Recipe,
+ *   ritorna il payload direttamente (non wrappato). 404 uniforme sia se lo
+ *   slug non esiste sia se esiste ma non è pubblicata — il pubblico non
+ *   deve mai poter distinguere i due casi (vedi commento nel route stesso).
+ * - lib/services/public-dto.ts → `PublicRecipePayload` è ESATTAMENTE la
+ *   forma qui sotto: nessun campo category/tag/taxonomy, nessun campo
+ *   difficulty/tempo/rating/autore. Non vanno quindi mostrati in UI.
+ * - `og_image_path`: verificato in app/org/[slug]/publishing/actions.ts —
+ *   il form di creazione publication lo imposta SEMPRE a `null` (non esiste
+ *   oggi una UI per valorizzarlo). Nella pratica è quindi sempre `null` per
+ *   ogni Recipe pubblicata oggi. Il codice qui sotto non assume comunque che
+ *   resti sempre null in futuro: se un giorno valesse qualcosa, va comunque
+ *   validato come URL assoluto prima di essere passato a next/image (Step
+ *   3H/3I) — path storage o valori non-URL vanno trattati come "non
+ *   utilizzabile" e si ricade sul placeholder locale.
  */
 
 const DEFAULT_BASE_URL = "https://aidady-business-os.vercel.app";
 const ORG_SLUG = "meloproduco";
+const RECIPES_REVALIDATE_SECONDS = 300; // stesso valore già usato in Home (Fase 2)
 
 function getBaseUrl(): string {
   return process.env.AIDADY_PUBLIC_API_BASE_URL || DEFAULT_BASE_URL;
 }
 
+export interface PublicRecipeIngredient {
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  preparation_note: string | null;
+  order_index: number;
+}
+
+export interface PublicRecipeStep {
+  step_number: number;
+  title: string | null;
+  instruction: string;
+  duration_minutes: number | null;
+}
+
 // Forma esatta del DTO pubblico, rispecchiata da
-// lib/services/public-dto.ts → publicRecipePayload() nel repository aiDady.
-// Qualunque campo NON elencato qui (test_notes, approval_notes, valutazioni
-// Prudence interne, audit trail, costi, stato workflow interno) non è mai
+// lib/services/public-dto.ts → publicDtoService.toPublicRecipePayload() nel
+// repository aiDady (riverificato in Fase 3, Step 3A). Qualunque campo NON
+// elencato qui (test_notes, approval_notes, valutazioni Prudence interne,
+// audit trail, costi, stato workflow interno, category/tag) non è mai
 // presente nella risposta pubblica: non va aggiunto a questo tipo "a scopo
 // di comodo", perché significherebbe assumere un campo che l'API non dà.
 export interface PublicRecipePayload {
@@ -38,45 +73,13 @@ export interface PublicRecipePayload {
   objective: string | null;
   yield_text: string | null;
   usage_instructions: string | null;
-  ingredients: Array<{
-    name: string;
-    quantity: number | null;
-    unit: string | null;
-    preparation_note: string | null;
-    order_index: number;
-  }>;
-  steps: Array<{
-    step_number: number;
-    title: string | null;
-    instruction: string;
-    duration_minutes: number | null;
-  }>;
+  ingredients: PublicRecipeIngredient[];
+  steps: PublicRecipeStep[];
   seo_title: string | null;
   seo_description: string | null;
   canonical_url: string | null;
   og_image_path: string | null;
   published_at: string | null;
-}
-
-/**
- * Recupera lo snapshot pubblico di una Recipe pubblicata.
- * Ritorna null se non trovata/non pubblicata (404) invece di lanciare,
- * così le pagine possono usare `notFound()` in modo pulito.
- */
-export async function getPublicRecipe(slug: string): Promise<PublicRecipePayload | null> {
-  const url = `${getBaseUrl()}/api/public/${ORG_SLUG}/recipes/${encodeURIComponent(slug)}`;
-
-  const res = await fetch(url, {
-    // Contenuto pubblico, cache Next standard con revalidazione periodica.
-    next: { revalidate: 300 },
-  });
-
-  if (res.status === 404) return null;
-  if (!res.ok) {
-    throw new Error(`aiDady public API error (${res.status}) fetching recipe "${slug}"`);
-  }
-
-  return (await res.json()) as PublicRecipePayload;
 }
 
 export interface PublicRecipeListResponse {
@@ -85,11 +88,103 @@ export interface PublicRecipeListResponse {
   offset: number;
 }
 
+/** Errore esplicito per "API raggiunta ma risposta non nella forma attesa". */
+export class MalformedResponseError extends Error {
+  constructor(context: string) {
+    super(`aiDady public API: risposta malformata (${context})`);
+    this.name = "MalformedResponseError";
+  }
+}
+
 /**
- * Recupera la lista di Recipe pubblicate. Predisposta per la Fase 2
- * (archivio /ricette reale): non ancora chiamata da nessuna pagina in
- * questa fase, ma la funzione esiste già tipizzata per evitare di doverla
- * indovinare più avanti.
+ * Errore esplicito per "fetch fallito o API non raggiungibile" (rete giù,
+ * timeout, 5xx). Distinto sia da un vero 404 (risorsa non trovata) sia da
+ * MalformedResponseError, così le pagine possono mostrare un messaggio
+ * editoriale coerente ("contenuto non disponibile ora") invece di far
+ * passare un errore infrastrutturale per un 404 (Step 3P).
+ */
+export class ApiUnavailableError extends Error {
+  constructor(context: string, options?: { cause?: unknown }) {
+    super(`aiDady public API non raggiungibile (${context})`);
+    this.name = "ApiUnavailableError";
+    if (options?.cause !== undefined) {
+      this.cause = options.cause;
+    }
+  }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Validazione runtime leggera — non un validatore esaustivo, solo una guardia contro risposte palesemente malformate. */
+function isPublicRecipePayload(value: unknown): value is PublicRecipePayload {
+  if (!isPlainObject(value)) return false;
+  return (
+    typeof value.slug === "string" &&
+    typeof value.title === "string" &&
+    Array.isArray(value.ingredients) &&
+    Array.isArray(value.steps)
+  );
+}
+
+function isPublicRecipeListResponse(value: unknown): value is PublicRecipeListResponse {
+  if (!isPlainObject(value)) return false;
+  if (!Array.isArray(value.items)) return false;
+  return value.items.every(isPublicRecipePayload);
+}
+
+/**
+ * Recupera lo snapshot pubblico di una Recipe pubblicata.
+ *
+ * - Ritorna `null` se non trovata/non pubblicata (404 reale dall'API) —
+ *   così le pagine possono usare `notFound()` in modo pulito (Step 3O).
+ * - Lancia `ApiUnavailableError` se il fetch fallisce o l'API risponde con
+ *   uno stato di errore non-404 — le pagine devono distinguerlo da un vero
+ *   404 e mostrare un messaggio "non disponibile ora" invece (Step 3P).
+ * - Lancia `MalformedResponseError` se l'API risponde 200 ma con una forma
+ *   inattesa (contratto rotto lato aiDady).
+ */
+export async function getPublicRecipe(slug: string): Promise<PublicRecipePayload | null> {
+  const url = `${getBaseUrl()}/api/public/${ORG_SLUG}/recipes/${encodeURIComponent(slug)}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      // Contenuto pubblico, cache Next standard con revalidazione periodica.
+      next: { revalidate: RECIPES_REVALIDATE_SECONDS },
+    });
+  } catch (err) {
+    throw new ApiUnavailableError(`fetch recipe "${slug}"`, { cause: err });
+  }
+
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new ApiUnavailableError(`recipe "${slug}" → HTTP ${res.status}`);
+  }
+
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch {
+    throw new MalformedResponseError(`recipe "${slug}" → risposta non-JSON`);
+  }
+
+  if (!isPublicRecipePayload(json)) {
+    throw new MalformedResponseError(`recipe "${slug}" → shape inattesa`);
+  }
+
+  return json;
+}
+
+/**
+ * Recupera la lista di Recipe pubblicate.
+ *
+ * Lancia `ApiUnavailableError` se il fetch fallisce o l'API risponde con
+ * uno stato di errore (nessun caso 404 previsto per la lista). Lancia
+ * `MalformedResponseError` se la forma della risposta non è quella attesa.
+ * Le pagine chiamanti sono responsabili di catturare questi errori e
+ * mostrare un fallback editoriale (mai propagare un errore tecnico in UI).
  */
 export async function listPublicRecipes(params: { limit?: number; offset?: number } = {}): Promise<PublicRecipeListResponse> {
   const search = new URLSearchParams();
@@ -97,11 +192,46 @@ export async function listPublicRecipes(params: { limit?: number; offset?: numbe
   if (params.offset) search.set("offset", String(params.offset));
 
   const url = `${getBaseUrl()}/api/public/${ORG_SLUG}/recipes${search.size ? `?${search}` : ""}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
 
-  if (!res.ok) {
-    throw new Error(`aiDady public API error (${res.status}) listing recipes`);
+  let res: Response;
+  try {
+    res = await fetch(url, { next: { revalidate: RECIPES_REVALIDATE_SECONDS } });
+  } catch (err) {
+    throw new ApiUnavailableError("list recipes", { cause: err });
   }
 
-  return (await res.json()) as PublicRecipeListResponse;
+  if (!res.ok) {
+    throw new ApiUnavailableError(`list recipes → HTTP ${res.status}`);
+  }
+
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch {
+    throw new MalformedResponseError("list recipes → risposta non-JSON");
+  }
+
+  if (!isPublicRecipeListResponse(json)) {
+    throw new MalformedResponseError("list recipes → shape inattesa");
+  }
+
+  return json;
+}
+
+/**
+ * Valida che `og_image_path` sia effettivamente un URL assoluto http/https
+ * utilizzabile da next/image. Oggi è sempre `null` (vedi commento in testa
+ * al file), ma questa funzione è la guardia esplicita da usare ovunque il
+ * campo venga letto, per non assumere mai che sia già un URL valido
+ * (Step 3H/3I — nessun proxy, nessuno storage privato, nessuna assunzione).
+ */
+export function resolvePublicImageUrl(ogImagePath: string | null): string | null {
+  if (!ogImagePath) return null;
+  try {
+    const parsed = new URL(ogImagePath);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
 }
