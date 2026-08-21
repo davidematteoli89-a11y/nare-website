@@ -49,6 +49,18 @@
  * confermare l'iscrizione" e la env `BREVO_DOUBLE_OPTIN_TEMPLATE_ID`
  * torna ad essere obbligatoria.
  *
+ * ✅ EMAIL DI CONFERMA SEMPLICE (21 ago 2026): per non lasciare l'utente
+ * senza alcun riscontro via email dopo l'iscrizione, subito dopo
+ * subscribeSingleOptIn (solo per i NUOVI iscritti, mai per
+ * already_subscribed — Step 8M, non spammare chi è già in lista) viene
+ * inviata una singola email transazionale con `sendWelcomeEmail`, tramite
+ * `POST /v3/smtp/email` (endpoint email transazionale Brevo, indipendente
+ * dal meccanismo DOI che ha dato il problema "An active DOI template does
+ * not exist" — quell'endpoint non richiede alcun flag DOI sul template).
+ * Nessun click di conferma richiesto: l'iscrizione resta immediata, questa
+ * è solo una notifica "ti sei iscritto" — coerente con Step 8S perché non
+ * finge un double opt-in che non sta avvenendo.
+ *
  * Env richieste (documentate anche in .env.example, Step 8D):
  * - BREVO_API_KEY — obbligatoria, mai pubblica.
  * - BREVO_NEWSLETTER_LIST_ID — obbligatoria, ID numerico della lista
@@ -58,8 +70,10 @@
  *   single opt-in temporaneo sopra descritto. Resta letta/validata da
  *   getBrevoDoubleOptInConfig() per quando il flusso DOI verrà
  *   ripristinato, ma getBrevoConfig() (usata ora) non la richiede.
- * - BREVO_WELCOME_TEMPLATE_ID — opzionale, non usata nel flusso single
- *   opt-in attuale.
+ * - BREVO_WELCOME_TEMPLATE_ID — usata da sendWelcomeEmail per l'email di
+ *   conferma semplice inviata dopo ogni nuova iscrizione single opt-in. Se
+ *   assente, l'invio viene saltato in silenzio (loggato server-side) senza
+ *   far fallire l'iscrizione, che resta comunque riuscita.
  */
 
 export interface BrevoConfig {
@@ -317,6 +331,62 @@ export async function subscribeSingleOptIn(params: {
   }
   console.error(`[newsletter] Brevo ${res.status} (single opt-in, unmapped):`, JSON.stringify(unknownBody));
   return { status: "error", reason: "unknown" };
+}
+
+/**
+ * Invia l'email di conferma semplice dopo un'iscrizione single opt-in
+ * riuscita, tramite l'endpoint email transazionale Brevo `POST
+ * /v3/smtp/email` con `templateId` (Step 8G, nota "EMAIL DI CONFERMA
+ * SEMPLICE" in cima al file). Questo endpoint invia una singola email
+ * usando un template esistente — non richiede alcun flag "DOI template",
+ * quindi non soffre del problema che ha bloccato subscribeDoubleOptIn.
+ *
+ * Va chiamata SOLO per i nuovi iscritti (mai per contatti già in lista,
+ * Step 8M — evitare di rispammare chi è già iscritto). Il fallimento di
+ * questo invio non deve mai far apparire come fallita l'iscrizione stessa
+ * (che è già avvenuta lato Brevo/contatti): l'errore viene solo loggato
+ * server-side (Step 8N), la Server Action chiamante ignora il valore di
+ * ritorno per la risposta alla UI.
+ */
+export async function sendWelcomeEmail(params: { apiKey: string; email: string; name?: string }): Promise<void> {
+  const { apiKey, email, name } = params;
+
+  const templateIdRaw = process.env.BREVO_WELCOME_TEMPLATE_ID;
+  const templateId = templateIdRaw ? Number.parseInt(templateIdRaw, 10) : NaN;
+  if (!templateIdRaw || Number.isNaN(templateId)) {
+    console.error("[newsletter] BREVO_WELCOME_TEMPLATE_ID mancante o non valida — email di conferma non inviata");
+    return;
+  }
+
+  let res: Response;
+  try {
+    res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "api-key": apiKey,
+      },
+      body: JSON.stringify({
+        to: [{ email, name: name || undefined }],
+        templateId,
+        params: name ? { FIRSTNAME: name } : undefined,
+      }),
+    });
+  } catch (err) {
+    console.error("[newsletter] Brevo smtp/email network error:", err instanceof Error ? err.message : err);
+    return;
+  }
+
+  if (res.status === 201) return;
+
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+  console.error(`[newsletter] Brevo smtp/email ${res.status}:`, JSON.stringify(body));
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

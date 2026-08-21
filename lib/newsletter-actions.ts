@@ -1,6 +1,6 @@
 "use server";
 
-import { getBrevoConfig, subscribeSingleOptIn } from "./brevo";
+import { getBrevoConfig, subscribeSingleOptIn, sendWelcomeEmail } from "./brevo";
 
 /**
  * Server Action per l'iscrizione newsletter — Fase 8, Step 8I/8L/8M/8N/8O.
@@ -18,7 +18,11 @@ import { getBrevoConfig, subscribeSingleOptIn } from "./brevo";
  * `alreadySubscribed` del risultato resta per compatibilità con la UI, ma
  * con single opt-in indica solo se Brevo ha riconosciuto un contatto
  * preesistente, non cambia il fatto che l'iscrizione è comunque attiva
- * subito (nessuna email di conferma da aspettare).
+ * subito (nessuna conferma via click da aspettare).
+ *
+ * Dopo un'iscrizione NUOVA riuscita, viene inviata una singola email di
+ * conferma (sendWelcomeEmail, "email di conferma semplice" — vedi nota in
+ * lib/brevo.ts), mai per contatti già iscritti (Step 8M).
  */
 
 export type NewsletterSubmitResult =
@@ -82,10 +86,16 @@ export async function subscribeToNewsletter(formData: FormData): Promise<Newslet
 
   switch (result.status) {
     case "confirmation_sent":
+      // Nuovo iscritto: invia l'email di conferma semplice. Un eventuale
+      // fallimento di questo invio è solo loggato server-side (vedi
+      // sendWelcomeEmail in lib/brevo.ts) e non deve mai far apparire
+      // fallita l'iscrizione, che è già avvenuta.
+      await sendWelcomeEmail({ apiKey: configResult.config.apiKey, email, name: name || undefined });
       return { ok: true, alreadySubscribed: false };
     case "already_subscribed":
       // Step 8M: mai "contact already exists" — trattato come successo
-      // silenzioso, la UI mostrerà un copy neutro e user-friendly.
+      // silenzioso, la UI mostrerà un copy neutro e user-friendly. Nessuna
+      // nuova email di conferma per non rispammare chi è già iscritto.
       return { ok: true, alreadySubscribed: true };
     case "error":
       return { ok: false, error: "unavailable" };
