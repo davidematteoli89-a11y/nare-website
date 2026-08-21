@@ -72,8 +72,8 @@ export default function CristinaInRaiPage() {
         </div>
 
         <p className="text-small mt-6 max-w-2xl text-[var(--color-foreground-muted)]">
-          Questa sezione non sponsorizza né rappresenta un rapporto ufficiale con Rai. I video sono in fase di
-          preparazione per la pubblicazione: verranno resi disponibili qui non appena pronti.
+          Questa sezione non sponsorizza né rappresenta un rapporto ufficiale con Rai. Alcuni interventi sono ancora
+          in fase di preparazione per la pubblicazione: verranno resi disponibili qui non appena pronti.
         </p>
 
         <div className="mt-10">

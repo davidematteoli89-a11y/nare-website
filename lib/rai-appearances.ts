@@ -20,16 +20,17 @@
  * direttamente dal cliente. Questo è sbagliato: possedere/ricevere un file
  * video NON equivale ad avere i diritti di ripubblicazione di un contenuto
  * televisivo Rai. Finché Cristina/Davide non confermano esplicitamente il
- * diritto di ripubblicazione, lo stato corretto è "rights_unknown" per
- * tutti e 14. Poster, programma, data, titolo/tema e descrizione restano
- * validi e usabili come archivio editoriale (sono fatti, non un diritto di
- * sfruttamento del video). I file sorgente sono inoltre lunghi (7-16
- * minuti, 47MB-1.2GB, formato 720p/HD) e non clip pronte per il web:
- * videoType resta "none" per tutti. La transizione a
- * "owned_file_rights_confirmed" (o altro stato che autorizzi la
- * pubblicazione) potrà avvenire solo dopo conferma esplicita del cliente,
- * e solo allora si valuterà editing/hosting streaming (es. Cloudflare
- * Stream, non implementato) e l'attivazione di un player pubblico.
+ * diritto di ripubblicazione, lo stato corretto è "rights_unknown".
+ *
+ * AGGIORNAMENTO (22 ago 2026): Davide ha confermato esplicitamente che i
+ * video sono stati ricaricati su un canale YouTube personale/di Cristina
+ * (non il canale ufficiale RAI) — quindi il controllo del contenuto è
+ * diretto, non un embed di una fonte terza. 13 dei 14 interventi hanno
+ * quindi videoType "youtube" + videoUrl valorizzato e
+ * _internalRightsStatus "owned_file_rights_confirmed". L'intervento del
+ * 15 aprile 2025 ("Macchie grasse...") resta "none"/"rights_unknown": il
+ * link YouTube non è stato fornito ("non disponibile al momento") e non va
+ * inventato. Quando sarà disponibile, va aggiornato con lo stesso schema.
  */
 
 /**
@@ -103,8 +104,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2026-08-04",
     topic: "Casa ed elettrodomestici",
     poster: "/images/rai/rai-unomattina-condizionatore-2026-08-04.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/s58Gbygl4ko",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2026-07-22",
@@ -112,8 +114,9 @@ export const raiAppearances: RaiAppearance[] = [
     programme: "Uno Mattina",
     date: "2026-07-22",
     poster: "/images/rai/rai-unomattina-2026-07-22.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/dCokpaChbIk",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2026-04-07-elettrodomestici",
@@ -122,8 +125,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2026-04-07",
     topic: "Casa ed elettrodomestici",
     poster: "/images/rai/rai-unomattina-elettrodomestici-2026-04-07.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/7WN4MlLN02Q",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2026-04-02-bicarbonato",
@@ -133,8 +137,9 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Pulizia della casa",
     description: "Un confronto pratico tra bicarbonato e percarbonato di sodio per la pulizia domestica.",
     poster: "/images/rai/rai-unomattina-bicarbonato-2026-04-02.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/MGZiuONFEyU",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2026-01-02-armadi",
@@ -143,8 +148,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2026-01-02",
     topic: "Organizzazione della casa",
     poster: "/images/rai/rai-unomattina-armadi-2026-01-02.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/eOiF1ysCmRE",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-estate-2025-07-08-salvaspazio",
@@ -153,8 +159,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2025-07-08",
     topic: "Organizzazione della casa",
     poster: "/images/rai/rai-unomattina-salvaspazio-2025-07-08.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/B64aUm78iVA",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-estate-2025-06-23",
@@ -162,8 +169,9 @@ export const raiAppearances: RaiAppearance[] = [
     programme: "Uno Mattina Estate",
     date: "2025-06-23",
     poster: "/images/rai/rai-unomattina-estate-2025-06-23.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/UiA6OxdnWqE",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2025-04-29-acari",
@@ -172,8 +180,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2025-04-29",
     topic: "Casa e benessere",
     poster: "/images/rai/rai-unomattina-acari-2025-04-29.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/21WGzua_fF0",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2025-04-15-macchie",
@@ -192,8 +201,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2024-08-28",
     topic: "Casa e dispensa",
     poster: "/images/rai/rai-unomattina-farfalline-2024-08-28.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/SN3N4n3fnKM",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-estate-2024-06-21-condizionatori",
@@ -202,8 +212,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2024-06-21",
     topic: "Casa ed elettrodomestici",
     poster: "/images/rai/rai-unomattina-condizionatori-2024-06-21.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/VRg9buTHDTU",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2024-03-12-calcare",
@@ -212,8 +223,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2024-03-12",
     topic: "Pulizia della casa",
     poster: "/images/rai/rai-unomattina-calcare-2024-03-12.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/B0fjAFpaqs8",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2024-01-26-lavandino",
@@ -222,8 +234,9 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2024-01-26",
     topic: "Manutenzione della casa",
     poster: "/images/rai/rai-unomattina-lavandino-2024-01-26.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/0mkhdtLTXiA",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
   {
     id: "unomattina-2023-10-17-pulizie-bagno",
@@ -232,7 +245,8 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2023-10-17",
     topic: "Pulizia della casa",
     poster: "/images/rai/rai-unomattina-pulizie-bagno-2023-10-17.jpg",
-    videoType: "none",
-    _internalRightsStatus: "rights_unknown",
+    videoType: "youtube",
+    videoUrl: "https://youtu.be/K2WBj2-Bl50",
+    _internalRightsStatus: "owned_file_rights_confirmed",
   },
 ];
