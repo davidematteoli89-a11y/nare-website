@@ -14,52 +14,36 @@
  * ("use server", vedi lib/newsletter-actions.ts) — non deve mai finire nel
  * bundle client. Nessuna funzione qui esposta a componenti "use client".
  *
- * ⚠️ DECISIONE TEMPORANEA (21 ago 2026) — SINGLE OPT-IN invece di DOUBLE
- * OPT-IN, in deroga esplicita alla preferenza di Step 8G/8H:
+ * ✅ RIPRISTINATO DOUBLE OPT-IN (21 ago 2026, dopo verifica manuale): il
+ * blocco "An active DOI template does not exist" che aveva costretto al
+ * fallback temporaneo single opt-in (vedi cronologia sotto) risultava
+ * legato alla configurazione del template — una volta ricreata/salvata
+ * tramite il wizard nativo Brevo (Contatti > Moduli > Iscrizione >
+ * Impostazioni > "Email di conferma doppia"), un submit di test reale ha
+ * ricevuto correttamente l'email di conferma DOI. Il flusso
+ * subscribeDoubleOptIn è quindi di nuovo quello attivo in
+ * newsletter-actions.ts.
  *
- * Il flusso double opt-in via `POST /v3/contacts/doubleOptinConfirmation`
- * (subscribeDoubleOptIn, sotto) è stato implementato e testato in
- * produzione con esito negativo: Brevo rifiuta sistematicamente la
- * richiesta con `400 invalid_parameter — "An active DOI template does not
- * exist"`, anche dopo aver:
- * 1. Verificato/riverificato il mittente del template (non era il problema:
- *    warning DKIM su dominio Gmail, non un blocco).
- * 2. Ricreato la configurazione DOI tramite il wizard nativo Brevo
- *    (Contatti > Moduli > Iscrizione > Email di conferma doppia),
- *    associando esplicitamente il template alla lista "Newsletter Narè".
- * 3. Confermato che il template risulta "Attiva" sia nella sezione Modelli
- *    che nel selettore del wizard DOI.
- * Ipotesi più probabile: la funzione DOI via API richiede un piano Brevo
- * superiore a quello attualmente attivo su questo account (alcune opzioni
- * correlate, es. blocco iscrizioni da provider gratuiti, sono
- * esplicitamente gated dietro il piano "Standard" nella stessa schermata).
- * Non confermato — richiede supporto Brevo per una risposta definitiva.
- *
- * Per non tenere la Fase 8 bloccata a tempo indeterminato, l'utente ha
- * scelto esplicitamente (non è un fallback automatico, vedi Step 8H) di
- * passare temporaneamente a single opt-in: `subscribeSingleOptIn` usa
- * `POST /v3/contacts` per creare/aggiornare il contatto e aggiungerlo
- * direttamente alla lista, SENZA email di conferma. Nessuna finzione di
- * "email inviata" verso l'utente: la UI deve riflettere che l'iscrizione è
- * immediata (vedi NewsletterFormShell.tsx).
- *
- * QUANDO IL DOI VERRÀ SBLOCCATO (upgrade piano o risposta supporto Brevo):
- * reintrodurre `subscribeDoubleOptIn` in newsletter-actions.ts al posto di
- * `subscribeSingleOptIn`, ripristinare il copy "Controlla la tua email per
- * confermare l'iscrizione" e la env `BREVO_DOUBLE_OPTIN_TEMPLATE_ID`
- * torna ad essere obbligatoria.
+ * Cronologia del fallback temporaneo (per riferimento, non più valida):
+ * il flusso double opt-in via `POST /v3/contacts/doubleOptinConfirmation`
+ * era stato testato con esito negativo (400 invalid_parameter — "An
+ * active DOI template does not exist"), nonostante mittente verificato e
+ * template marcato "Attiva". Il problema si è risolto risalvando la
+ * configurazione del modulo di iscrizione lato Brevo con "Email di
+ * conferma doppia" selezionata esplicitamente — causa esatta non
+ * confermata (possibile stato di configurazione del template non
+ * propagato correttamente lato Brevo alla prima creazione).
  *
  * Env richieste (documentate anche in .env.example, Step 8D):
  * - BREVO_API_KEY — obbligatoria, mai pubblica.
  * - BREVO_NEWSLETTER_LIST_ID — obbligatoria, ID numerico della lista
  *   "Newsletter Narè" in Brevo (Step 8E: una sola lista, nessuna
  *   segmentazione per area).
- * - BREVO_DOUBLE_OPTIN_TEMPLATE_ID — NON più obbligatoria con il fallback
- *   single opt-in temporaneo sopra descritto. Resta letta/validata da
- *   getBrevoDoubleOptInConfig() per quando il flusso DOI verrà
- *   ripristinato, ma getBrevoConfig() (usata ora) non la richiede.
- * - BREVO_WELCOME_TEMPLATE_ID — opzionale, non usata nel flusso single
- *   opt-in attuale.
+ * - BREVO_DOUBLE_OPTIN_TEMPLATE_ID — obbligatoria per il flusso double
+ *   opt-in (Step 8G): ID del template email di conferma iscrizione.
+ * - BREVO_WELCOME_TEMPLATE_ID — opzionale. Se assente, nessuna email di
+ *   benvenuto extra viene inviata oltre a quella di conferma double
+ *   opt-in.
  */
 
 export interface BrevoConfig {
@@ -70,10 +54,14 @@ export interface BrevoConfig {
 export type BrevoConfigResult = { ok: true; config: BrevoConfig } | { ok: false; missing: string[] };
 
 /**
- * Legge e valida la config Brevo minima (single opt-in) da env. Ritorna
- * esplicitamente quali variabili mancano invece di lanciare/loggare
- * l'errore con dettagli — la Server Action decide poi come comunicarlo
- * (mai al client, solo nei log server, Step 8N).
+ * Legge e valida la config Brevo minima da env. Ritorna esplicitamente
+ * quali variabili mancano invece di lanciare/loggare l'errore con
+ * dettagli — la Server Action decide poi come comunicarlo (mai al
+ * client, solo nei log server, Step 8N).
+ *
+ * Usata dal flusso single opt-in (subscribeSingleOptIn), mantenuto nel
+ * codice come fallback disponibile ma non più quello attivo — vedi
+ * getBrevoDoubleOptInConfig() per la config usata dal flusso attivo.
  */
 export function getBrevoConfig(): BrevoConfigResult {
   const missing: string[] = [];
@@ -144,8 +132,7 @@ export function getBrevoDoubleOptInConfig(): BrevoDoubleOptInConfigResult {
  * `redirectionUrl` è la pagina Narè su cui Brevo reindirizza l'utente dopo
  * il click di conferma nell'email (Step 8G — /newsletter/conferma).
  *
- * ⚠️ Non usata dal flusso attivo — vedi nota "DECISIONE TEMPORANEA" in
- * cima al file. Mantenuta per il ripristino futuro del DOI.
+ * ✅ Flusso attivo (ripristinato 21 ago 2026) — vedi nota in cima al file.
  */
 export async function subscribeDoubleOptIn(params: {
   config: BrevoDoubleOptInConfig;
@@ -231,12 +218,9 @@ export async function subscribeDoubleOptIn(params: {
  * di conferma. L'iscrizione è immediata — nessun click di conferma
  * richiesto all'utente.
  *
- * ⚠️ DECISIONE TEMPORANEA (21 ago 2026) — vedi nota completa in cima al
- * file. Attualmente il flusso attivo, in sostituzione di
- * subscribeDoubleOptIn, per una scelta esplicita dell'utente dopo che il
- * flusso double opt-in è risultato bloccato lato Brevo (errore "An active
- * DOI template does not exist", causa non confermata — sospetto piano
- * Brevo insufficiente, da verificare col supporto Brevo).
+ * ⚠️ NON usata dal flusso attivo (dal 21 ago 2026 il flusso attivo è
+ * subscribeDoubleOptIn, vedi nota in cima al file). Mantenuta nel codice
+ * come fallback disponibile se il DOI dovesse ripresentare problemi.
  *
  * Brevo: `updateEnabled: true` fa sì che un contatto già esistente venga
  * aggiornato (incluse le liste) invece di fallire con un errore di

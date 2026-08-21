@@ -12,8 +12,9 @@ const initialState: NewsletterSubmitResult | null = null;
  * Form newsletter reale — Fase 8, Step 8P/8Q/8F/8L.
  *
  * Collegato a lib/newsletter-actions.ts (Server Action) → Brevo,
- * double opt-in (Step 8G). Nessuna API key nel client: il form invoca
- * solo la Server Action, che gira interamente sul server.
+ * double opt-in (Step 8G, ripristinato 21 ago 2026 — vedi lib/brevo.ts).
+ * Nessuna API key nel client: il form invoca solo la Server Action, che
+ * gira interamente sul server.
  *
  * Campi (Step 8F): email (obbligatoria), nome (opzionale, solo in forma
  * non-compact), consenso privacy (obbligatorio, checkbox MAI
@@ -36,14 +37,15 @@ export function NewsletterFormShell({ compact = false }: { compact?: boolean }) 
   const success = state?.ok === true;
 
   if (success) {
-    // Copy aggiornato per il flusso single opt-in temporaneo (21 ago 2026,
-    // vedi nota in lib/brevo.ts): l'iscrizione è immediata, nessuna email
-    // di conferma da attendere/cliccare.
+    // Copy per il flusso double opt-in (Step 8G/8S, ripristinato 21 ago
+    // 2026): l'iscrizione non è ancora attiva finché l'utente non clicca il
+    // link nell'email di conferma Brevo — mai fingere una conferma non
+    // ancora avvenuta.
     return (
       <p role="status" className="rounded-[var(--radius-md)] bg-[var(--color-success-bg)] px-4 py-3 text-sm text-[var(--color-success)]">
         {state.alreadySubscribed
           ? "Se questa email è già iscritta, non devi fare altro."
-          : "Iscrizione avvenuta con successo. Da ora riceverai le novità di Narè."}
+          : "Controlla la tua email: ti abbiamo inviato un link per confermare l'iscrizione."}
       </p>
     );
   }
