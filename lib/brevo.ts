@@ -129,12 +129,33 @@ export async function subscribeDoubleOptIn(params: {
     if (code === "duplicate_parameter" || code === "contact_already_exist") {
       return { status: "already_subscribed" };
     }
+    // Debug log (Step 8N): status + body Brevo, MAI la api-key (non è mai
+    // stata nel body/header loggato qui). Utile per diagnosticare
+    // config errata (list/template ID sbagliati) senza esporre nulla al
+    // client, che riceve solo il risultato mappato "error".
+    console.error("[newsletter] Brevo 400:", JSON.stringify(body));
     return { status: "error", reason: "invalid_config" };
   }
 
-  if (res.status === 401 || res.status === 403) return { status: "error", reason: "invalid_config" };
+  if (res.status === 401 || res.status === 403) {
+    let body: unknown;
+    try {
+      body = await res.json();
+    } catch {
+      body = null;
+    }
+    console.error(`[newsletter] Brevo ${res.status}:`, JSON.stringify(body));
+    return { status: "error", reason: "invalid_config" };
+  }
   if (res.status === 429) return { status: "error", reason: "rate_limited" };
 
+  let unknownBody: unknown;
+  try {
+    unknownBody = await res.json();
+  } catch {
+    unknownBody = null;
+  }
+  console.error(`[newsletter] Brevo ${res.status} (unmapped):`, JSON.stringify(unknownBody));
   return { status: "error", reason: "unknown" };
 }
 
