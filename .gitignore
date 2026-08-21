@@ -37,6 +37,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# materiali grezzi Fase 4B (foto/video originali forniti dal cliente, mai da
+# committare: video sorgente pesanti, cartella di lavoro temporanea — le
+# versioni ottimizzate per il web vivono in public/images/)
+/_materiali-fase4b/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

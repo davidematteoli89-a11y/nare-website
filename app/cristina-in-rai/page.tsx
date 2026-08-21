@@ -10,37 +10,36 @@ const CANONICAL_URL = "https://nare-website.vercel.app/cristina-in-rai";
 
 export const metadata: Metadata = {
   title: "Cristina in RAI",
-  description: "Gli interventi televisivi di Cristina di Narè su Rai — archivio in costruzione.",
+  description:
+    "Gli interventi di Cristina Nigrelli a Uno Mattina e Uno Mattina Estate su Rai1: economia domestica, pulizia e organizzazione della casa.",
   alternates: { canonical: CANONICAL_URL },
   openGraph: {
     title: "Cristina in RAI",
-    description: "Gli interventi televisivi di Cristina di Narè su Rai.",
+    description: "Gli interventi di Cristina Nigrelli a Uno Mattina e Uno Mattina Estate, Rai1.",
     url: CANONICAL_URL,
     type: "website",
   },
 };
 
 /**
- * /cristina-in-rai — Fase 4 (Step 4C/4F-4N).
+ * /cristina-in-rai — Fase 4B (contenuti reali).
  *
- * Legge da lib/rai-appearances.ts (Step 4D), la stessa fonte dati usata
- * dalla sezione Home (Step 4L) e dalla preview su /cristina — nessuna
- * duplicazione manuale dei dati tra le tre viste.
+ * Legge da lib/rai-appearances.ts, la stessa fonte dati usata dalla sezione
+ * Home e dalla preview su /cristina — nessuna duplicazione manuale.
  *
- * Al momento della stesura raiAppearances è vuoto (Step 4A: nessun dato
- * reale disponibile), quindi la pagina mostra l'empty state editoriale.
- * L'intera struttura (grid, VideoPlaceholder, VideoObject JSON-LD) è però
- * già pronta a rendere dati reali non appena forniti/verificati, senza
- * bisogno di riscrivere la pagina.
+ * 14 interventi reali (Uno Mattina / Uno Mattina Estate, Rai1, 2023-2026)
+ * forniti dal cliente in Fase 4B. Tutti con videoType "none": i file sorgente
+ * esistono (vedi lib/rai-appearances.ts, _internalRightsStatus) ma sono
+ * video lunghi non ancora tagliati/ospitati per la pubblicazione web — ogni
+ * card mostra quindi solo poster/titolo/programma/data/tema, mai un player.
  *
  * VideoObject JSON-LD: emesso SOLO per interventi con videoType diverso da
- * "none" e videoUrl presente (Step 4N) — un intervento solo testuale non
- * genera schema video, per non dichiarare un contenuto multimediale che non
- * esiste o non è ancora pubblicamente accessibile.
+ * "none" e videoUrl presente (Step 4N) — oggi nessuno, quindi nessuno schema
+ * VideoObject viene emesso, corretto perché nessun video è pubblicamente
+ * accessibile.
  *
  * Person JSON-LD: non emesso in questa fase — richiederebbe dati verificati
- * (sameAs, ruolo ufficiale) che non sono ancora stati forniti; verrà
- * aggiunto quando quei dati saranno reali (Step 4A/4N).
+ * aggiuntivi (sameAs, pagina ufficiale) non ancora forniti.
  */
 export default function CristinaInRaiPage() {
   const videoJsonLd = raiAppearances
@@ -64,13 +63,13 @@ export default function CristinaInRaiPage() {
           <SectionHeader
             eyebrow="Media"
             title="Cristina in RAI"
-            description="Archivio degli interventi televisivi di Cristina — in costruzione."
+            description="Gli interventi di Cristina a Uno Mattina e Uno Mattina Estate, su Rai1."
           />
         </div>
 
         <p className="text-small mt-6 max-w-2xl text-[var(--color-foreground-muted)]">
-          Questa sezione non sponsorizza né rappresenta un rapporto ufficiale con Rai. Ogni video reale sarà pubblicato
-          solo dopo la verifica dei diritti d&apos;uso del singolo intervento.
+          Questa sezione non sponsorizza né rappresenta un rapporto ufficiale con Rai. I video sono in fase di
+          preparazione per la pubblicazione: verranno resi disponibili qui non appena pronti.
         </p>
 
         <div className="mt-10">

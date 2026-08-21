@@ -12,31 +12,30 @@ import { raiAppearances } from "@/lib/rai-appearances";
 const CANONICAL_URL = "https://nare-website.vercel.app/cristina";
 
 export const metadata: Metadata = {
-  title: "Cristina di Narè",
+  title: "Cristina Nigrelli — Cristina di Narè",
   description:
-    "Cristina di Narè: esperta di economia domestica e naturopata, filo conduttore di Narè tra autoproduzione, divulgazione pratica ed esperienza televisiva.",
+    "Cristina Nigrelli, di Narè: esperta di economia domestica e naturopata, volto di Uno Mattina e Uno Mattina Estate su Rai1, filo conduttore di Narè tra autoproduzione e divulgazione pratica.",
   alternates: { canonical: CANONICAL_URL },
   openGraph: {
-    title: "Cristina di Narè",
+    title: "Cristina Nigrelli — Cristina di Narè",
     description:
-      "Esperta di economia domestica e naturopata, Cristina di Narè unisce divulgazione pratica ed esperienza televisiva a un lavoro concreto di autoproduzione e formazione.",
+      "Esperta di economia domestica e naturopata, Cristina Nigrelli unisce divulgazione pratica ed esperienza televisiva (Uno Mattina, Rai1) a un lavoro concreto di autoproduzione e formazione.",
     url: CANONICAL_URL,
     type: "profile",
   },
 };
 
 /**
- * /cristina — Fase 4 (Step 4B).
+ * /cristina — Fase 4B (contenuti reali).
  *
- * Nessuna foto reale di Cristina è ancora presente nel repository
- * (public/images/cristina/ è vuota — audit Step 4A): l'immagine hero usa lo
- * stesso placeholder neutro già in uso in Home, chiaramente marcato come
- * tale via alt text. La bio è scritta a partire dal posizionamento editoriale
- * già stabilito e stabile nelle fasi precedenti (Home, metadata, nav:
- * economia domestica, naturopatia, divulgazione pratica, esperienza
- * televisiva) — nessun fatto biografico specifico (date, programmi, aneddoti)
- * viene inventato qui; quei dettagli richiedono contenuti reali forniti dal
- * cliente.
+ * Foto hero ed editoriale reali (public/images/cristina/cristina-hero.jpg,
+ * cristina-editorial.jpg), fornite dal cliente in Fase 4B. Il cognome
+ * "Nigrelli" e il ruolo "Esperta di economia domestica" sono confermati
+ * visivamente dal lower-third Rai in uno dei video forniti (Uno Mattina
+ * Estate, 23/06/2025) — non un dato inventato. Nessuna bio testuale
+ * dettagliata è stata ancora fornita dal cliente: il testo resta quindi
+ * ancorato al posizionamento editoriale già stabile nelle fasi precedenti,
+ * senza aggiungere aneddoti o dettagli biografici non verificati.
  */
 export default function CristinaPage() {
   const preview = raiAppearances.slice(0, 3);
@@ -66,8 +65,8 @@ export default function CristinaPage() {
           </div>
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)]">
             <Image
-              src="/images/placeholders/hero-cristina.png"
-              alt="Ritratto di Cristina di Narè — immagine segnaposto in attesa di una foto reale"
+              src="/images/cristina/cristina-hero.jpg"
+              alt="Cristina Nigrelli, di Narè, ritratto all'aperto"
               fill
               priority
               sizes="(min-width: 1024px) 50vw, 100vw"
@@ -81,26 +80,38 @@ export default function CristinaPage() {
       <div className="bg-[var(--color-surface-subtle)]">
         <Container className="py-16 sm:py-20">
           <SectionHeader eyebrow="Il percorso" title="Chi è Cristina" />
-          <div className="text-body mt-6 max-w-2xl space-y-4 text-[var(--color-foreground-muted)]">
-            <p>
-              La formazione di Cristina unisce due mondi che raramente si incontrano con la stessa serietà: l&apos;economia
-              domestica, intesa come gestione consapevole della casa e delle risorse quotidiane, e la naturopatia, come
-              attenzione al benessere naturale della persona. Da questa combinazione nasce l&apos;approccio che oggi guida
-              tutto Narè.
-            </p>
-            <p>
-              Negli anni, questo lavoro si è tradotto anche in divulgazione pratica rivolta a un pubblico ampio, incluse
-              apparizioni televisive su Rai (raccolte nella sezione{" "}
-              <a href="/cristina-in-rai" className="text-[var(--color-accent-text)] underline underline-offset-4">
-                Cristina in RAI
-              </a>
-              ) dedicate a temi di autoproduzione e vita quotidiana.
-            </p>
-            <p>
-              Narè nasce per raccogliere e sistematizzare questo lavoro: non ricette o consigli isolati, ma un metodo —
-              osservare, scegliere con criterio, fare esperienza diretta e condividere solo ciò che è stato davvero
-              testato.
-            </p>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+            <div className="text-body space-y-4 text-[var(--color-foreground-muted)]">
+              <p>
+                Cristina Nigrelli, esperta di economia domestica e naturopata, unisce due mondi che raramente si
+                incontrano con la stessa serietà: l&apos;economia domestica, intesa come gestione consapevole della casa
+                e delle risorse quotidiane, e la naturopatia, come attenzione al benessere naturale della persona. Da
+                questa combinazione nasce l&apos;approccio che oggi guida tutto Narè.
+              </p>
+              <p>
+                Negli anni, questo lavoro si è tradotto anche in divulgazione pratica rivolta a un pubblico ampio,
+                incluse numerose apparizioni come esperta di economia domestica a Uno Mattina e Uno Mattina Estate, su
+                Rai1 (raccolte nella sezione{" "}
+                <a href="/cristina-in-rai" className="text-[var(--color-accent-text)] underline underline-offset-4">
+                  Cristina in RAI
+                </a>
+                ) dedicate a pulizia, organizzazione e manutenzione della casa.
+              </p>
+              <p>
+                Narè nasce per raccogliere e sistematizzare questo lavoro: non ricette o consigli isolati, ma un metodo —
+                osservare, scegliere con criterio, fare esperienza diretta e condividere solo ciò che è stato davvero
+                testato.
+              </p>
+            </div>
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <Image
+                src="/images/cristina/cristina-editorial.jpg"
+                alt="Cristina Nigrelli, ritratto"
+                fill
+                sizes="(min-width: 1024px) 33vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         </Container>
       </div>

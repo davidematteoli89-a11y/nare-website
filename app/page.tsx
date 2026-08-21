@@ -78,8 +78,8 @@ function Hero() {
         </div>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)]">
           <Image
-            src="/images/placeholders/hero-cristina.png"
-            alt="Ritratto di Cristina di Narè — immagine segnaposto in attesa di una foto reale"
+            src="/images/cristina/cristina-hero.jpg"
+            alt="Cristina Nigrelli, di Narè, ritratto all'aperto"
             fill
             priority
             sizes="(min-width: 1024px) 50vw, 100vw"
@@ -258,9 +258,9 @@ function CristinaSection() {
           <Eyebrow>Chi c&apos;è dietro Narè</Eyebrow>
           <h2 className="text-h2 mt-3 text-[var(--color-foreground)]">Dietro Narè c&apos;è Cristina.</h2>
           <p className="text-body mt-4 max-w-lg text-[var(--color-foreground-muted)]">
-            Esperta di economia domestica e naturopata, Cristina di Narè unisce da anni divulgazione pratica ed esperienza
-            televisiva a un lavoro concreto fatto di autoproduzione, workshop e attività educative — sempre con un
-            approccio pratico e prudente.
+            Esperta di economia domestica e naturopata, Cristina Nigrelli unisce da anni divulgazione pratica ed
+            esperienza televisiva — è tra i volti di Uno Mattina e Uno Mattina Estate su Rai1 — a un lavoro concreto
+            fatto di autoproduzione, workshop e attività educative, sempre con un approccio pratico e prudente.
           </p>
           <div className="mt-6">
             <LinkButton href="/cristina" variant="secondary">
@@ -270,8 +270,8 @@ function CristinaSection() {
         </div>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)] lg:order-first">
           <Image
-            src="/images/placeholders/hero-cristina.png"
-            alt="Cristina di Narè — immagine segnaposto in attesa di una foto reale"
+            src="/images/cristina/cristina-editorial.jpg"
+            alt="Cristina Nigrelli, di Narè"
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
