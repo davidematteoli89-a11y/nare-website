@@ -42,6 +42,10 @@ yarn-error.log*
 # versioni ottimizzate per il web vivono in public/images/)
 /_materiali-fase4b/
 
+# file personali/di lavoro estranei al progetto, individuati durante l'audit
+# repository Fase 10V — non pertinenti al sito, mai da committare
+/Supabase/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

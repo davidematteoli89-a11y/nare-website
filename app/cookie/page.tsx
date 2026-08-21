@@ -25,6 +25,9 @@ export const metadata: Metadata = {
  * pixel di marketing, un embed che traccia), questa pagina e l'eventuale
  * necessità di un banner di consenso preventivo andranno rivalutate PRIMA
  * di attivare quello strumento.
+ *
+ * Dati titolare aggiornati Fase 10F (dati reali forniti dal cliente, non
+ * inventati — vedi nota completa in app/privacy/page.tsx).
  */
 export default function CookiePage() {
   return (
@@ -85,7 +88,10 @@ export default function CookiePage() {
       </p>
 
       <p className="mt-8 text-xs text-[var(--color-foreground-muted)]">
-        [DA INSERIRE: titolare del trattamento] · [DA INSERIRE: email di contatto per richieste privacy/cookie]
+        Titolare: Cristina Nigrelli · Via San Donato 79, 56028 San Miniato (PI) ·{" "}
+        <a href="mailto:cristinanaturopata@gmail.com" className="text-[var(--color-accent-text)] underline underline-offset-4">
+          cristinanaturopata@gmail.com
+        </a>
       </p>
     </Container>
   );

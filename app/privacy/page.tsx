@@ -10,15 +10,20 @@ export const metadata: Metadata = {
 };
 
 /**
- * Pagina legale — Privacy Policy (Fase 9O).
+ * Pagina legale — Privacy Policy (Fase 9O, dati titolare aggiornati Fase 10F).
  *
- * ATTENZIONE: questo NON è un testo legale definitivo. È una struttura
- * accurata rispetto a cosa il sito raccoglie realmente oggi (verificato sul
- * codice sorgente), pronta a ricevere i dati legali reali (titolare,
- * indirizzo, base giuridica dettagliata, periodi di conservazione) da un
- * consulente privacy prima del go-live. Le sezioni [DA INSERIRE] e [DA
- * VALIDARE] sono segnaposto espliciti, non vanno rimossi né compilati con
- * dati inventati.
+ * ATTENZIONE: questo NON è un testo legale definitivo. Il titolare del
+ * trattamento, l'indirizzo e l'email di contatto sono dati reali forniti
+ * direttamente dal cliente (21 ago 2026) — non inventati, ma nemmeno
+ * validati da un consulente legale. Restano [DA VALIDARE] esplicitamente
+ * la base giuridica dettagliata, il periodo di conservazione, l'eventuale
+ * trasferimento extra-UE verso Brevo e l'elenco completo dei diritti
+ * dell'interessato: questi punti richiedono consulenza privacy reale prima
+ * del go-live definitivo, non vanno compilati con testo generico.
+ *
+ * Nota: il titolare è oggi una persona fisica (P.IVA prevista tra qualche
+ * mese, non ancora attiva) — se/quando verrà aperta la P.IVA, questa
+ * sezione andrà aggiornata di conseguenza (nuova ragione sociale/P.IVA).
  */
 export default function PrivacyPage() {
   return (
@@ -33,7 +38,14 @@ export default function PrivacyPage() {
 
       <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Titolare del trattamento</h2>
       <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
-        [DA INSERIRE: titolare del trattamento] · [DA INSERIRE: indirizzo] · [DA INSERIRE: email privacy]
+        Cristina Nigrelli · Via San Donato 79, 56028 San Miniato (PI) ·{" "}
+        <a href="mailto:cristinanaturopata@gmail.com" className="text-[var(--color-accent-text)] underline underline-offset-4">
+          cristinanaturopata@gmail.com
+        </a>
+      </p>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        [DA VALIDARE: titolare oggi persona fisica, non ancora titolare di Partita IVA — questa sezione andrà
+        aggiornata quando la Partita IVA sarà attiva.]
       </p>
 
       <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Dati raccolti tramite la newsletter</h2>
