@@ -21,6 +21,11 @@ export const metadata: Metadata = {
  * client (Step 8S: "NON fingere conferma se Brevo non l'ha realmente
  * eseguita" — qui la conferma è già avvenuta in Brevo prima del redirect,
  * la pagina si limita a comunicarlo).
+ *
+ * ⚠️ Con il fallback temporaneo a single opt-in (21 ago 2026, vedi
+ * lib/brevo.ts) questa pagina non riceve più traffico reale: Brevo non
+ * invia alcuna email di conferma da cliccare, quindi nessun redirect vi
+ * arriva. Lasciata intatta per il ripristino futuro del DOI.
  */
 export default function NewsletterConfermaPage() {
   return (

@@ -1,6 +1,6 @@
 "use server";
 
-import { getBrevoConfig, subscribeDoubleOptIn } from "./brevo";
+import { getBrevoConfig, subscribeSingleOptIn } from "./brevo";
 
 /**
  * Server Action per l'iscrizione newsletter — Fase 8, Step 8I/8L/8M/8N/8O.
@@ -12,6 +12,13 @@ import { getBrevoConfig, subscribeDoubleOptIn } from "./brevo";
  *
  * Stato ritornato alla UI: sempre uno union type sicuro, mai la risposta
  * raw Brevo (Step 8I.6/8N).
+ *
+ * ⚠️ DECISIONE TEMPORANEA (21 ago 2026): usa subscribeSingleOptIn invece di
+ * subscribeDoubleOptIn — vedi nota completa in lib/brevo.ts. Il campo
+ * `alreadySubscribed` del risultato resta per compatibilità con la UI, ma
+ * con single opt-in indica solo se Brevo ha riconosciuto un contatto
+ * preesistente, non cambia il fatto che l'iscrizione è comunque attiva
+ * subito (nessuna email di conferma da aspettare).
  */
 
 export type NewsletterSubmitResult =
@@ -67,13 +74,10 @@ export async function subscribeToNewsletter(formData: FormData): Promise<Newslet
     return { ok: false, error: "config_missing" };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
-  const result = await subscribeDoubleOptIn({
+  const result = await subscribeSingleOptIn({
     config: configResult.config,
     email,
     name: name || undefined,
-    redirectionUrl: `${siteUrl}/newsletter/conferma`,
   });
 
   switch (result.status) {

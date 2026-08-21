@@ -36,11 +36,14 @@ export function NewsletterFormShell({ compact = false }: { compact?: boolean }) 
   const success = state?.ok === true;
 
   if (success) {
+    // Copy aggiornato per il flusso single opt-in temporaneo (21 ago 2026,
+    // vedi nota in lib/brevo.ts): l'iscrizione è immediata, nessuna email
+    // di conferma da attendere/cliccare.
     return (
       <p role="status" className="rounded-[var(--radius-md)] bg-[var(--color-success-bg)] px-4 py-3 text-sm text-[var(--color-success)]">
         {state.alreadySubscribed
           ? "Se questa email è già iscritta, non devi fare altro."
-          : "Controlla la tua email per confermare l'iscrizione."}
+          : "Iscrizione avvenuta con successo. Da ora riceverai le novità di Narè."}
       </p>
     );
   }
