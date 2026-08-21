@@ -1,13 +1,19 @@
 import Link from "next/link";
 import { Container } from "./Container";
-import { PRIMARY_NAV, FOOTER_LEGAL_NAV } from "@/lib/nav";
+import { PRIMARY_NAV, FOOTER_LEGAL_NAV, FUTURE_NAV } from "@/lib/nav";
 
 /**
  * Footer (Step 1H, riallineato in Fase 1B, rifinito in Fase 2G). Brand
  * ombrello Narè. Blocchi: NARÈ (brand statement) / ESPLORA (MeLoProduco,
- * Incontri, Cristina, In RAI) / COMMUNITY (Newsletter, social solo se
- * reali) / LEGAL. Nessun logo RAI. Nessun link social inventato. Le aree
- * future (Ritiri, Famiglie, In Viaggio) non compaiono finché sono vuote.
+ * Incontri, Cristina, In RAI + Ritiri/Famiglie/In Viaggio, Fase 6 Step 6S)
+ * / COMMUNITY (Newsletter, social solo se reali) / LEGAL. Nessun logo RAI.
+ * Nessun link social inventato.
+ *
+ * Ritiri/Famiglie/In Viaggio compaiono qui (Fase 6) ora che le rispettive
+ * pagine hanno contenuto editoriale reale, ma restano fuori dall'header
+ * (nav primaria MVP, vedi Header.tsx) per non appesantire la navigazione
+ * principale — 7 voci testuali in una colonna footer restano ordinate,
+ * mentre 7 voci in una nav orizzontale non lo sarebbero.
  */
 export function Footer() {
   return (
@@ -28,6 +34,13 @@ export function Footer() {
               <li key={item.href}>
                 <Link href={item.href} className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
                   {item.label}
+                </Link>
+              </li>
+            ))}
+            {FUTURE_NAV.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
+                  Narè {item.label}
                 </Link>
               </li>
             ))}

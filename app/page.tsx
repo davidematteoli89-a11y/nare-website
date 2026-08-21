@@ -154,23 +154,28 @@ function MondiNare() {
           </Link>
         </div>
 
-        {/* Ritiri, Famiglie, In Viaggio — presentate in modo più leggero, nessun contenuto reale ancora */}
+        {/* Ritiri, Famiglie, In Viaggio — Fase 6: le route esistono davvero
+            ora, quindi sono card cliccabili, ma restano volutamente più
+            leggere di MeLoProduco/Incontri (bordo tratteggiato, nessuna
+            immagine) per non presentare 5 sezioni come identiche. */}
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {FUTURE_NAV.map((area) => {
             const descriptions: Record<string, string> = {
-              "/ritiri": "Esperienze più immersive, quando saranno attive.",
-              "/famiglie": "Attività educative per famiglie, scuole e bambini.",
+              "/ritiri": "Esperienze più immersive, tra natura e manualità.",
+              "/famiglie": "Attività pratiche per famiglie, bambini e scuole.",
               "/in-viaggio": "Narè fuori sede, nei territori e nelle collaborazioni.",
             };
             return (
-              <div
+              <Link
                 key={area.href}
-                className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)] p-5 opacity-80"
+                href={area.href}
+                className="group rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)] p-5 transition-colors hover:border-[var(--color-accent)]"
               >
-                <p className="text-small font-semibold text-[var(--color-foreground)]">Narè {area.label}</p>
+                <p className="text-small font-semibold text-[var(--color-foreground)] group-hover:text-[var(--color-accent-text)]">
+                  Narè {area.label}
+                </p>
                 <p className="text-meta mt-1.5 text-[var(--color-foreground-muted)]">{descriptions[area.href]}</p>
-                <p className="text-meta mt-2 italic text-[var(--color-foreground-muted)]">In preparazione</p>
-              </div>
+              </Link>
             );
           })}
         </div>
