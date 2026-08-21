@@ -22,9 +22,10 @@ export const metadata: Metadata = {
  * eseguita" — qui la conferma è già avvenuta in Brevo prima del redirect,
  * la pagina si limita a comunicarlo).
  *
- * ✅ Double opt-in ripristinato (21 ago 2026, vedi lib/brevo.ts): questa
- * pagina è di nuovo raggiungibile — riceve il redirect reale ogni volta
- * che un utente clicca il link nell'email di conferma Brevo.
+ * ⚠️ Con il fallback temporaneo a single opt-in (21 ago 2026, vedi
+ * lib/brevo.ts) questa pagina non riceve più traffico reale: Brevo non
+ * invia alcuna email di conferma da cliccare, quindi nessun redirect vi
+ * arriva. Lasciata intatta per il ripristino futuro del DOI.
  */
 export default function NewsletterConfermaPage() {
   return (
