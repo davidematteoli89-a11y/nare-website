@@ -3,7 +3,7 @@ import { Container } from "@/components/Container";
 import { SectionHeader } from "@/components/SectionHeader";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { EmptyState } from "@/components/EmptyState";
-import { VideoPlaceholder } from "@/components/VideoPlaceholder";
+import { VideoCard } from "@/components/VideoCard";
 import { raiAppearances } from "@/lib/rai-appearances";
 
 const CANONICAL_URL = "https://nare-website.vercel.app/cristina-in-rai";
@@ -22,21 +22,21 @@ export const metadata: Metadata = {
 };
 
 /**
- * /cristina-in-rai — Fase 4B (contenuti reali).
+ * /cristina-in-rai — Fase 4D (player video).
  *
  * Legge da lib/rai-appearances.ts, la stessa fonte dati usata dalla sezione
  * Home e dalla preview su /cristina — nessuna duplicazione manuale.
  *
- * 14 interventi reali (Uno Mattina / Uno Mattina Estate, Rai1, 2023-2026)
- * forniti dal cliente in Fase 4B. Tutti con videoType "none": i file sorgente
- * esistono (vedi lib/rai-appearances.ts, _internalRightsStatus) ma sono
- * video lunghi non ancora tagliati/ospitati per la pubblicazione web — ogni
- * card mostra quindi solo poster/titolo/programma/data/tema, mai un player.
+ * 14 interventi reali (Uno Mattina / Uno Mattina Estate, Rai1, 2023-2026).
+ * Ogni card usa VideoCard: se l'intervento ha videoType "youtube" e un
+ * videoUrl valido, il click apre un player YouTube in un modale sopra la
+ * pagina (mai un redirect a youtube.com) — vedi components/VideoCard.tsx e
+ * VideoModal.tsx. Gli interventi senza video pubblicato (videoType "none",
+ * es. diritti non ancora confermati) restano poster statici non cliccabili.
  *
  * VideoObject JSON-LD: emesso SOLO per interventi con videoType diverso da
- * "none" e videoUrl presente (Step 4N) — oggi nessuno, quindi nessuno schema
- * VideoObject viene emesso, corretto perché nessun video è pubblicamente
- * accessibile.
+ * "none" e videoUrl presente (Step 4N) — si attiva automaticamente quando
+ * un intervento passa a "youtube", nessuna modifica necessaria qui.
  *
  * Person JSON-LD: non emesso in questa fase — richiederebbe dati verificati
  * aggiuntivi (sameAs, pagina ufficiale) non ancora forniti.
@@ -82,11 +82,13 @@ export default function CristinaInRaiPage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {raiAppearances.map((appearance) => (
                 <div key={appearance.id}>
-                  <VideoPlaceholder
+                  <VideoCard
                     title={appearance.title}
                     programme={appearance.programme}
                     date={appearance.date}
                     posterSrc={appearance.poster ?? "/images/placeholders/video-poster.png"}
+                    videoType={appearance.videoType}
+                    videoUrl={appearance.videoUrl}
                   />
                   {(appearance.topic || appearance.description) && (
                     <p className="text-small mt-3 text-[var(--color-foreground-muted)]">

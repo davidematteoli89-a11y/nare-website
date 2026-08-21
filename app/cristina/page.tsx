@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { LinkButton } from "@/components/Button";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { EmptyState } from "@/components/EmptyState";
-import { VideoPlaceholder } from "@/components/VideoPlaceholder";
+import { VideoCard } from "@/components/VideoCard";
 import { raiAppearances } from "@/lib/rai-appearances";
 
 const CANONICAL_URL = "https://nare-website.vercel.app/cristina";
@@ -197,12 +197,14 @@ export default function CristinaPage() {
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {preview.map((appearance) => (
-                <VideoPlaceholder
+                <VideoCard
                   key={appearance.id}
                   title={appearance.title}
                   programme={appearance.programme}
                   date={appearance.date}
                   posterSrc={appearance.poster ?? "/images/placeholders/video-poster.png"}
+                  videoType={appearance.videoType}
+                  videoUrl={appearance.videoUrl}
                 />
               ))}
             </div>

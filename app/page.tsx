@@ -7,7 +7,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { EditorialCard } from "@/components/EditorialCard";
 import { NewsletterFormShell } from "@/components/NewsletterFormShell";
-import { VideoPlaceholder } from "@/components/VideoPlaceholder";
+import { VideoCard } from "@/components/VideoCard";
 import { FUTURE_NAV } from "@/lib/nav";
 import { listPublicRecipes } from "@/lib/aidady-api";
 import { raiAppearances } from "@/lib/rai-appearances";
@@ -317,12 +317,14 @@ function CristinaInRaiSection() {
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {preview.map((appearance) => (
-                <VideoPlaceholder
+                <VideoCard
                   key={appearance.id}
                   title={appearance.title}
                   programme={appearance.programme}
                   date={appearance.date}
                   posterSrc={appearance.poster ?? "/images/placeholders/video-poster.png"}
+                  videoType={appearance.videoType}
+                  videoUrl={appearance.videoUrl}
                 />
               ))}
             </div>
