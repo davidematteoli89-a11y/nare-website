@@ -39,6 +39,7 @@ import "server-only";
 const DEFAULT_BASE_URL = "https://aidady-business-os.vercel.app";
 const ORG_SLUG = "meloproduco";
 const RECIPES_REVALIDATE_SECONDS = 300; // stesso valore già usato in Home (Fase 2)
+const WORKSHOPS_REVALIDATE_SECONDS = 300; // stesso valore delle Recipe, nessuna ragione per differenziare
 
 function getBaseUrl(): string {
   return process.env.AIDADY_PUBLIC_API_BASE_URL || DEFAULT_BASE_URL;
@@ -234,4 +235,153 @@ export function resolvePublicImageUrl(ogImagePath: string | null): string | null
   } catch {
     return null;
   }
+}
+
+/**
+ * Client per le API pubbliche Workshop di aiDady (Fase 5 — Step 5A/5B).
+ * Sul sito pubblico Narè, l'entità "Workshop" viene presentata come
+ * "Narè Incontri" — SOLO un rename di presentazione: backend/API/route
+ * restano "workshop" ovunque, come da vincolo esplicito della Fase 5.
+ *
+ * Verifica Step 5A, fatta leggendo il codice sorgente reale (non assunta):
+ * - aidady-public-api: app/api/public/[orgSlug]/workshops/route.ts → GET,
+ *   stessi query param limit/offset delle recipes, stessa forma di risposta
+ *   `{ items: PublicWorkshopPayload[], limit, offset }`, nessun `total`.
+ * - .../workshops/[slug]/route.ts → GET singolo, 404 uniforme se non
+ *   trovato o non pubblicato (mai distinguibile dal pubblico).
+ * - aidady-business-os: lib/services/public-dto.ts →
+ *   `publicDtoService.toPublicWorkshopPayload()` è ESATTAMENTE la forma
+ *   sotto. Verificato IMPORTANTE: nessun campo `location`/`luogo`, nessun
+ *   campo immagine dedicato al workshop (solo `og_image_path`, usato solo
+ *   per SEO/social — stesso status di sempre-`null` oggi delle Recipe),
+ *   nessun `registration_url`/`external_url`/`contact_url`. `upcoming_sessions`
+ *   contiene solo sessioni future non cancellate/non completate (il filtro
+ *   "upcoming" è già applicato server-side da aiDady, non va rifatto qui).
+ * - Testato in produzione (21/08/2026): endpoint raggiungibile, 200 OK,
+ *   `{"items":[],"limit":20,"offset":0}` — oggi 0 Workshop pubblicati,
+ *   stato confermato, non un errore.
+ */
+export interface PublicWorkshopSession {
+  start_at: string | null;
+  end_at: string | null;
+  capacity: number | null;
+  price_per_person: number | null;
+}
+
+// Forma esatta del DTO pubblico Workshop (lib/services/public-dto.ts →
+// PublicWorkshopPayload in aiDady, riverificata Step 5A). Nessun campo NON
+// elencato qui va assunto o mostrato in UI.
+export interface PublicWorkshopPayload {
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  description: string;
+  upcoming_sessions: PublicWorkshopSession[];
+  seo_title: string | null;
+  seo_description: string | null;
+  canonical_url: string | null;
+  og_image_path: string | null;
+  published_at: string | null;
+}
+
+export interface PublicWorkshopListResponse {
+  items: PublicWorkshopPayload[];
+  limit: number;
+  offset: number;
+}
+
+function isPublicWorkshopSession(value: unknown): value is PublicWorkshopSession {
+  if (!isPlainObject(value)) return false;
+  return "start_at" in value && "end_at" in value && "capacity" in value && "price_per_person" in value;
+}
+
+function isPublicWorkshopPayload(value: unknown): value is PublicWorkshopPayload {
+  if (!isPlainObject(value)) return false;
+  return (
+    typeof value.slug === "string" &&
+    typeof value.title === "string" &&
+    typeof value.description === "string" &&
+    Array.isArray(value.upcoming_sessions) &&
+    value.upcoming_sessions.every(isPublicWorkshopSession)
+  );
+}
+
+function isPublicWorkshopListResponse(value: unknown): value is PublicWorkshopListResponse {
+  if (!isPlainObject(value)) return false;
+  if (!Array.isArray(value.items)) return false;
+  return value.items.every(isPublicWorkshopPayload);
+}
+
+/**
+ * Recupera lo snapshot pubblico di un Workshop ("Narè Incontri") pubblicato.
+ * Stessa semantica di getPublicRecipe: null se non trovato/non pubblicato
+ * (404 reale), ApiUnavailableError per fetch falliti/errori HTTP non-404,
+ * MalformedResponseError per risposte 200 con forma inattesa.
+ */
+export async function getPublicWorkshop(slug: string): Promise<PublicWorkshopPayload | null> {
+  const url = `${getBaseUrl()}/api/public/${ORG_SLUG}/workshops/${encodeURIComponent(slug)}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, { next: { revalidate: WORKSHOPS_REVALIDATE_SECONDS } });
+  } catch (err) {
+    throw new ApiUnavailableError(`fetch workshop "${slug}"`, { cause: err });
+  }
+
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new ApiUnavailableError(`workshop "${slug}" → HTTP ${res.status}`);
+  }
+
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch {
+    throw new MalformedResponseError(`workshop "${slug}" → risposta non-JSON`);
+  }
+
+  if (!isPublicWorkshopPayload(json)) {
+    throw new MalformedResponseError(`workshop "${slug}" → shape inattesa`);
+  }
+
+  return json;
+}
+
+/**
+ * Recupera la lista di Workshop pubblicati ("Narè Incontri"). Stessa
+ * semantica di listPublicRecipes: ApiUnavailableError per fetch
+ * falliti/errori HTTP, MalformedResponseError per shape inattesa. Le
+ * pagine chiamanti gestiscono il fallback editoriale, mai un errore
+ * tecnico in UI.
+ */
+export async function listPublicWorkshops(params: { limit?: number; offset?: number } = {}): Promise<PublicWorkshopListResponse> {
+  const search = new URLSearchParams();
+  if (params.limit) search.set("limit", String(params.limit));
+  if (params.offset) search.set("offset", String(params.offset));
+
+  const url = `${getBaseUrl()}/api/public/${ORG_SLUG}/workshops${search.size ? `?${search}` : ""}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, { next: { revalidate: WORKSHOPS_REVALIDATE_SECONDS } });
+  } catch (err) {
+    throw new ApiUnavailableError("list workshops", { cause: err });
+  }
+
+  if (!res.ok) {
+    throw new ApiUnavailableError(`list workshops → HTTP ${res.status}`);
+  }
+
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch {
+    throw new MalformedResponseError("list workshops → risposta non-JSON");
+  }
+
+  if (!isPublicWorkshopListResponse(json)) {
+    throw new MalformedResponseError("list workshops → shape inattesa");
+  }
+
+  return json;
 }

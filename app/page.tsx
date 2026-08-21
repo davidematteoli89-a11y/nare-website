@@ -9,8 +9,10 @@ import { EditorialCard } from "@/components/EditorialCard";
 import { NewsletterFormShell } from "@/components/NewsletterFormShell";
 import { VideoCard } from "@/components/VideoCard";
 import { FUTURE_NAV } from "@/lib/nav";
-import { listPublicRecipes } from "@/lib/aidady-api";
+import { listPublicRecipes, listPublicWorkshops, resolvePublicImageUrl, type PublicWorkshopPayload } from "@/lib/aidady-api";
 import { raiAppearances } from "@/lib/rai-appearances";
+import { formatDateIt } from "@/lib/format";
+import { Badge } from "@/components/Badge";
 
 /**
  * Homepage definitiva — Fase 2 (Step 2H-2R).
@@ -27,13 +29,14 @@ import { raiAppearances } from "@/lib/rai-appearances";
  */
 export default async function HomePage() {
   const recipes = await safeListRecipes();
+  const workshops = await safeListWorkshops();
 
   return (
     <>
       <Hero />
       <MondiNare />
       <MeLoProducoSection recipes={recipes} />
-      <IncontriSection />
+      <IncontriSection workshops={workshops} />
       <CristinaSection />
       <CristinaInRaiSection />
       <MetodoSection />
@@ -49,6 +52,16 @@ async function safeListRecipes() {
     return res.items;
   } catch {
     return null; // null = API irraggiungibile, distinto da [] = nessuna ricetta pubblicata
+  }
+}
+
+/** Stesso pattern di safeListRecipes, per Narè Incontri (Fase 5, Step 5M). */
+async function safeListWorkshops() {
+  try {
+    const res = await listPublicWorkshops({ limit: 3 });
+    return res.items;
+  } catch {
+    return null;
   }
 }
 
@@ -216,12 +229,7 @@ function MeLoProducoSection({ recipes }: { recipes: Awaited<ReturnType<typeof sa
 /* NARÈ INCONTRI — Step 2M                                                 */
 /* ---------------------------------------------------------------------- */
 
-function IncontriSection() {
-  // Nota: aiDady non espone ancora un endpoint pubblico "list" per i
-  // Workshop consumabile da questo client (solo il dettaglio per slug è
-  // predisposto lato aiDady, e comunque oggi 0 workshop sono pubblicati).
-  // Per non inventare eventi, questa sezione resta un'introduzione
-  // istituzionale, non un archivio con dati reali.
+function IncontriSection({ workshops }: { workshops: Awaited<ReturnType<typeof safeListWorkshops>> }) {
   return (
     <div className="bg-[var(--color-surface-subtle)]">
       <Container className="py-16 sm:py-20">
@@ -236,13 +244,53 @@ function IncontriSection() {
           }
         />
         <div className="mt-8">
-          <EmptyState
-            title="Nessun incontro pubblicato al momento."
-            description="I prossimi appuntamenti saranno annunciati qui e sulla pagina Narè Incontri."
-          />
+          {workshops === null ? (
+            <EmptyState
+              title="Gli incontri non sono disponibili in questo momento."
+              description="Riprova tra qualche minuto, oppure esplora la pagina Narè Incontri."
+            />
+          ) : workshops.length === 0 ? (
+            <EmptyState
+              title="Nessun incontro pubblicato al momento."
+              description="I prossimi appuntamenti saranno annunciati qui e sulla pagina Narè Incontri."
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {workshops.map((workshop) => (
+                <HomeWorkshopCard key={workshop.slug} workshop={workshop} />
+              ))}
+            </div>
+          )}
         </div>
       </Container>
     </div>
+  );
+}
+
+function HomeWorkshopCard({ workshop }: { workshop: PublicWorkshopPayload }) {
+  const imageUrl = resolvePublicImageUrl(workshop.og_image_path);
+  const nextSession = workshop.upcoming_sessions[0];
+
+  return (
+    <Link
+      href={`/incontri/${workshop.slug}`}
+      className="group block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] transition-shadow duration-200 hover:shadow-[var(--shadow-md)]"
+    >
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-surface-subtle)]">
+        <Image
+          src={imageUrl ?? "/images/placeholders/editorial-generic.png"}
+          alt={workshop.title}
+          fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="object-cover"
+        />
+      </div>
+      <div className="p-5">
+        {nextSession?.start_at && <Badge className="mb-2 block">{formatDateIt(nextSession.start_at)}</Badge>}
+        <h3 className="text-h3 text-[var(--color-foreground)] group-hover:text-[var(--color-accent-text)]">{workshop.title}</h3>
+        {workshop.excerpt && <p className="text-small mt-2 line-clamp-2 text-[var(--color-foreground-muted)]">{workshop.excerpt}</p>}
+      </div>
+    </Link>
   );
 }
 
