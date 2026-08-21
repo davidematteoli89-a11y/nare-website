@@ -7,8 +7,10 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { EditorialCard } from "@/components/EditorialCard";
 import { NewsletterFormShell } from "@/components/NewsletterFormShell";
+import { VideoPlaceholder } from "@/components/VideoPlaceholder";
 import { FUTURE_NAV } from "@/lib/nav";
 import { listPublicRecipes } from "@/lib/aidady-api";
+import { raiAppearances } from "@/lib/rai-appearances";
 
 /**
  * Homepage definitiva — Fase 2 (Step 2H-2R).
@@ -281,10 +283,17 @@ function CristinaSection() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* CRISTINA IN RAI — Step 2O                                               */
+/* CRISTINA IN RAI — Step 2O, aggiornata in Fase 4 (Step 4L)               */
 /* ---------------------------------------------------------------------- */
 
+/**
+ * Legge da lib/rai-appearances.ts, la stessa fonte dati di /cristina-in-rai
+ * (Fase 4, Step 4D/4L) — nessuna duplicazione manuale. Mostra al massimo 3
+ * interventi, con lo stesso empty state elegante finché l'array è vuoto.
+ */
 function CristinaInRaiSection() {
+  const preview = raiAppearances.slice(0, 3);
+
   return (
     <div className="bg-[var(--color-surface-subtle)]">
       <Container className="py-16 sm:py-20">
@@ -300,10 +309,24 @@ function CristinaInRaiSection() {
         />
 
         <div className="mt-8">
-          <EmptyState
-            title="Nessun intervento ancora pubblicato in questa fase."
-            description="Gli interventi RAI saranno collegati dopo la verifica dei diritti d'uso di ciascun video."
-          />
+          {preview.length === 0 ? (
+            <EmptyState
+              title="Nessun intervento ancora pubblicato in questa fase."
+              description="Gli interventi RAI saranno collegati dopo la verifica dei diritti d'uso di ciascun video."
+            />
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {preview.map((appearance) => (
+                <VideoPlaceholder
+                  key={appearance.id}
+                  title={appearance.title}
+                  programme={appearance.programme}
+                  date={appearance.date}
+                  posterSrc={appearance.poster ?? "/images/placeholders/video-poster.png"}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <p className="text-meta mt-6 max-w-2xl text-[var(--color-foreground-muted)]">
@@ -348,7 +371,7 @@ function MetodoSection() {
 
 function NewsletterSection() {
   return (
-    <div className="bg-[var(--color-surface-subtle)]">
+    <div id="newsletter" className="bg-[var(--color-surface-subtle)]">
       <Container className="py-16 sm:py-20">
         <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 sm:p-12">
           <SectionHeader eyebrow="Newsletter" title="Un po' di Narè, direttamente nella tua casella." />
