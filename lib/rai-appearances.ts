@@ -11,18 +11,25 @@
  * un titolo (5 video), il titolo/tema qui sotto riflette solo ciò che era
  * leggibile nel frame del video stesso (sottopancia), mai un'ipotesi.
  *
- * IMPORTANTE (Step 4B.8): _internalRightsStatus è uno stato solo
- * DOCUMENTALE/INTERNO, usato per decidere come e se pubblicare ciascun
- * video — NON deve mai essere mostrato nella UI pubblica. Tutti i 14 video
- * qui sotto sono oggi "owned_file_rights_confirmed" (file forniti
- * direttamente dal cliente, non link di terzi), ma sono file sorgente lunghi
- * (7-16 minuti, 47MB-1.2GB, formato 720p/HD) scaricati da Uno Mattina/Rai —
- * non clip già pronte per il web. Per questo videoType è "none" per tutti:
- * pubblicare il video richiede prima (a) tagliare/preparare la clip
- * pertinente, (b) caricarla su un hosting streaming (Cloudflare Stream,
- * proposta ma non implementata in questa fase — Step 4B.13), (c) conferma
- * esplicita del cliente a procedere. Fino ad allora le card mostrano solo
- * poster/titolo/programma/data/descrizione, mai un player pubblico.
+ * IMPORTANTE (Step 4B.8, corretto in Fase 4C): _internalRightsStatus è uno
+ * stato solo DOCUMENTALE/INTERNO, usato per decidere come e se pubblicare
+ * ciascun video — NON deve mai essere mostrato nella UI pubblica.
+ *
+ * CORREZIONE FASE 4C: i 14 video erano stati marcati erroneamente come
+ * "owned_file_rights_confirmed" solo perché i file sono stati forniti
+ * direttamente dal cliente. Questo è sbagliato: possedere/ricevere un file
+ * video NON equivale ad avere i diritti di ripubblicazione di un contenuto
+ * televisivo Rai. Finché Cristina/Davide non confermano esplicitamente il
+ * diritto di ripubblicazione, lo stato corretto è "rights_unknown" per
+ * tutti e 14. Poster, programma, data, titolo/tema e descrizione restano
+ * validi e usabili come archivio editoriale (sono fatti, non un diritto di
+ * sfruttamento del video). I file sorgente sono inoltre lunghi (7-16
+ * minuti, 47MB-1.2GB, formato 720p/HD) e non clip pronte per il web:
+ * videoType resta "none" per tutti. La transizione a
+ * "owned_file_rights_confirmed" (o altro stato che autorizzi la
+ * pubblicazione) potrà avvenire solo dopo conferma esplicita del cliente,
+ * e solo allora si valuterà editing/hosting streaming (es. Cloudflare
+ * Stream, non implementato) e l'attivazione di un player pubblico.
  */
 
 /**
@@ -35,10 +42,13 @@ export type RaiVideoType = "cloudflare" | "youtube" | "raiplay" | "external" | "
 
 /**
  * Stato interno/documentale dei diritti d'uso di un video — mai esposto in UI.
- * - owned_file_rights_confirmed: file fornito direttamente dal cliente (proprietario dell'intervento).
+ * - owned_file_rights_confirmed: il cliente ha confermato ESPLICITAMENTE il diritto di
+ *   ripubblicazione del contenuto (non basta possedere/aver ricevuto il file).
  * - official_embed_available: esiste un embed ufficiale RaiPlay/YouTube RAI utilizzabile.
  * - link_only: si può linkare solo la fonte ufficiale, nessun file/embed disponibile.
- * - rights_unknown: diritti non verificati — NON pubblicare in nessuna forma.
+ * - rights_unknown: file disponibile ma diritto di ripubblicazione NON ancora confermato
+ *   dal cliente — stato di default per qualunque file ricevuto senza conferma esplicita.
+ *   NON pubblicare in nessuna forma (nessun player, nessun videoUrl, nessun VideoObject).
  */
 export type RaiInternalRightsStatus =
   | "owned_file_rights_confirmed"
@@ -78,9 +88,12 @@ export interface RaiAppearance {
 
 /**
  * 14 interventi reali, ordinati dal più recente al più vecchio. Tutti con
- * videoType "none" (nessun player pubblico ancora — vedi nota sopra) e
- * poster reale estratto dal file video fornito (frame con Cristina/il tema
- * visibile, nessun logo RAI riprodotto separatamente sul poster).
+ * videoType "none" e _internalRightsStatus "rights_unknown" (diritti di
+ * ripubblicazione non ancora confermati dal cliente — vedi nota sopra):
+ * nessun player pubblico, nessun videoUrl. Poster reale estratto dal file
+ * video fornito (frame con Cristina/il tema visibile, nessun logo RAI
+ * riprodotto separatamente sul poster) — utilizzabile come archivio
+ * editoriale a prescindere dallo stato dei diritti del video stesso.
  */
 export const raiAppearances: RaiAppearance[] = [
   {
@@ -91,7 +104,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Casa ed elettrodomestici",
     poster: "/images/rai/rai-unomattina-condizionatore-2026-08-04.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2026-07-22",
@@ -100,7 +113,7 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2026-07-22",
     poster: "/images/rai/rai-unomattina-2026-07-22.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2026-04-07-elettrodomestici",
@@ -110,7 +123,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Casa ed elettrodomestici",
     poster: "/images/rai/rai-unomattina-elettrodomestici-2026-04-07.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2026-04-02-bicarbonato",
@@ -121,7 +134,7 @@ export const raiAppearances: RaiAppearance[] = [
     description: "Un confronto pratico tra bicarbonato e percarbonato di sodio per la pulizia domestica.",
     poster: "/images/rai/rai-unomattina-bicarbonato-2026-04-02.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2026-01-02-armadi",
@@ -131,7 +144,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Organizzazione della casa",
     poster: "/images/rai/rai-unomattina-armadi-2026-01-02.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-estate-2025-07-08-salvaspazio",
@@ -141,7 +154,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Organizzazione della casa",
     poster: "/images/rai/rai-unomattina-salvaspazio-2025-07-08.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-estate-2025-06-23",
@@ -150,7 +163,7 @@ export const raiAppearances: RaiAppearance[] = [
     date: "2025-06-23",
     poster: "/images/rai/rai-unomattina-estate-2025-06-23.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2025-04-29-acari",
@@ -160,7 +173,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Casa e benessere",
     poster: "/images/rai/rai-unomattina-acari-2025-04-29.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2025-04-15-macchie",
@@ -170,7 +183,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Pulizia dei tessuti",
     poster: "/images/rai/rai-unomattina-macchie-2025-04-15.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-estate-2024-08-28-farfalline",
@@ -180,7 +193,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Casa e dispensa",
     poster: "/images/rai/rai-unomattina-farfalline-2024-08-28.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-estate-2024-06-21-condizionatori",
@@ -190,7 +203,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Casa ed elettrodomestici",
     poster: "/images/rai/rai-unomattina-condizionatori-2024-06-21.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2024-03-12-calcare",
@@ -200,7 +213,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Pulizia della casa",
     poster: "/images/rai/rai-unomattina-calcare-2024-03-12.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2024-01-26-lavandino",
@@ -210,7 +223,7 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Manutenzione della casa",
     poster: "/images/rai/rai-unomattina-lavandino-2024-01-26.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
   {
     id: "unomattina-2023-10-17-pulizie-bagno",
@@ -220,6 +233,6 @@ export const raiAppearances: RaiAppearance[] = [
     topic: "Pulizia della casa",
     poster: "/images/rai/rai-unomattina-pulizie-bagno-2023-10-17.jpg",
     videoType: "none",
-    _internalRightsStatus: "owned_file_rights_confirmed",
+    _internalRightsStatus: "rights_unknown",
   },
 ];
