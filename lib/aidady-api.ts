@@ -38,8 +38,20 @@ import "server-only";
 
 const DEFAULT_BASE_URL = "https://aidady-business-os.vercel.app";
 const ORG_SLUG = "meloproduco";
-const RECIPES_REVALIDATE_SECONDS = 300; // stesso valore già usato in Home (Fase 2)
-const WORKSHOPS_REVALIDATE_SECONDS = 300; // stesso valore delle Recipe, nessuna ragione per differenziare
+// BUG FIX (audit pubblicazione, 21 ago 2026): 300s (5 minuti) di Next.js
+// Data Cache significava che un contenuto annullato in aiDady poteva
+// restare visibile sul sito Narè per fino a 5 minuti anche se l'API
+// aiDady era già aggiornata istantaneamente — verificato end-to-end su
+// Brioche al Burro (pubblica → visibile subito; annulla → ancora
+// visibile per minuti). Abbassato a 30s: nessuna invalidazione attiva
+// (revalidateTag/webhook) introdotta, perché richiederebbe un endpoint
+// dedicato su questo progetto richiamato da aiDady via webhook — due
+// deploy Vercel indipendenti, infrastruttura sproporzionata rispetto al
+// problema una volta che il TTL è basso. 30s è un compromesso: abbastanza
+// breve da non lasciare contenuti ritirati visibili a lungo, abbastanza
+// alto da non generare un fetch a aiDady ad ogni singola richiesta.
+const RECIPES_REVALIDATE_SECONDS = 30;
+const WORKSHOPS_REVALIDATE_SECONDS = 30;
 
 function getBaseUrl(): string {
   return process.env.AIDADY_PUBLIC_API_BASE_URL || DEFAULT_BASE_URL;
