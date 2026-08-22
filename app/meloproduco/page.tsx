@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { LinkButton } from "@/components/Button";
 import { EmptyState } from "@/components/EmptyState";
 import { EditorialCard } from "@/components/EditorialCard";
-import { listPublicRecipes, listAllPublicRecipes, extractAvailableFilters, resolvePublicImageUrl, type PublicRecipePayload } from "@/lib/aidady-api";
+import { listPublicGuides, listPublicRecipes, listAllPublicRecipes, extractAvailableFilters, resolvePublicImageUrl, type PublicGuidePayload, type PublicRecipePayload } from "@/lib/aidady-api";
 import { FEATURED_NEEDS } from "@/lib/discovery";
 
 /**
@@ -45,6 +45,7 @@ export const metadata: Metadata = {
 export default async function MeLoProducoPage() {
   const recipes = await safeListRecentRecipes();
   const categories = await safeListCategories();
+  const guides = await safeListRecentGuides();
 
   return (
     <>
@@ -54,10 +55,19 @@ export default async function MeLoProducoPage() {
       <CosaTrovi />
       <UltimeRicette recipes={recipes} />
       <Metodo />
-      <Guide />
+      <Guide guides={guides} />
       <CtaNare />
     </>
   );
+}
+
+async function safeListRecentGuides(): Promise<PublicGuidePayload[] | null> {
+  try {
+    const res = await listPublicGuides({ limit: 3 });
+    return res.items;
+  } catch {
+    return null;
+  }
 }
 
 async function safeListRecentRecipes(): Promise<PublicRecipePayload[] | null> {
@@ -304,26 +314,25 @@ function Metodo() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* GUIDE — Fase 7, Step 7M: 0 Guide reali pubblicate oggi (nessun endpoint */
-/* pubblico ancora esposto da aiDady, vedi app/guide/page.tsx), quindi il  */
-/* blocco resta un rimando editoriale leggero — ma ora punta alla pagina   */
-/* /guide reale, che esiste da questa fase (Step 3C.5 → Step 7M).          */
+/* GUIDE — contenuti pubblicati reali; nessuna card per bozze o placeholder. */
 /* ---------------------------------------------------------------------- */
 
-function Guide() {
+function Guide({ guides }: { guides: PublicGuidePayload[] | null }) {
   return (
     <Container className="py-16 sm:py-20">
-      <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-subtle)] p-8 text-center sm:p-10">
-        <p className="text-h3 text-[var(--color-foreground)]">Guide e approfondimenti arriveranno qui.</p>
-        <p className="text-small mx-auto mt-2 max-w-md text-[var(--color-foreground-muted)]">
-          Accanto alle ricette, MeLoProduco ospiterà in futuro guide più ampie su casa, autoproduzione e botanica.
-        </p>
-        <div className="mt-5">
-          <LinkButton href="/guide" variant="secondary" size="sm">
-            Vai alle Guide
-          </LinkButton>
-        </div>
+      <SectionHeader eyebrow="Approfondimenti" title="Guide" description="Per capire come funzionano ingredienti, pratiche e gesti quotidiani prima di metterli in pratica." />
+      <div className="mt-8">
+        {guides === null ? (
+          <EmptyState title="Le Guide non sono disponibili in questo momento." description="Riprova tra qualche minuto oppure esplora l’archivio dedicato." />
+        ) : guides.length === 0 ? (
+          <EmptyState title="Le prime Guide MeLoProduco stanno prendendo forma." description="Compariranno qui dopo l’approvazione e la pubblicazione editoriale." />
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {guides.map((guide) => <EditorialCard key={guide.slug} href={`/guide/${guide.slug}`} title={guide.title} excerpt={guide.excerpt ?? undefined} category={guide.topic?.name ?? guide.area?.name} imageSrc={resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"} imageAlt={guide.title} />)}
+          </div>
+        )}
       </div>
+      <div className="mt-6"><LinkButton href="/guide" variant="secondary" size="sm">Vai a tutte le Guide</LinkButton></div>
     </Container>
   );
 }
