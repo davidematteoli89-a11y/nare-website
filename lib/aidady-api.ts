@@ -159,7 +159,21 @@ export interface PublicRecipePayload {
   og_image_path: string | null;
   published_at: string | null;
   discovery: PublicDiscoveryBlock;
+  related_guides?: PublicRelatedContent[];
 }
+
+export interface PublicRelatedContent { slug: string; title: string; excerpt: string | null; og_image_path: string | null; }
+
+export interface PublicGuidePayload {
+  slug: string; title: string; excerpt: string | null; body: string;
+  seo_title: string | null; seo_description: string | null; canonical_url: string | null;
+  og_image_path: string | null; published_at: string | null; content_type: "guide";
+  area: { slug: string; name: string } | null; topic: { slug: string; name: string } | null;
+  tags: string[]; related_recipes: PublicRelatedContent[]; related_guides: PublicRelatedContent[];
+}
+
+export interface PublicGuideListResponse { items: PublicGuidePayload[]; limit: number; offset: number; }
+export interface GuideFilters { area?: string; topic?: string; tag?: string; limit?: number; offset?: number; }
 
 /** Filtri opzionali accettati da GET /api/public/[orgSlug]/recipes (Fase 11, Step 11L). Tutti gli slug sono whitelisted lato server (regex ^[a-z0-9-]+$); valori non validi tornano 400 — qui passiamo solo ciò che l'utente ha selezionato in UI, già negli enum/slug corretti. */
 export interface RecipeDiscoveryFilters {
@@ -207,6 +221,37 @@ export class ApiUnavailableError extends Error {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPublicGuide(value: unknown): value is PublicGuidePayload {
+  return isPlainObject(value) && typeof value.slug === "string" && typeof value.title === "string" && typeof value.body === "string" && value.content_type === "guide" && Array.isArray(value.tags) && Array.isArray(value.related_recipes) && Array.isArray(value.related_guides);
+}
+
+export async function getPublicGuide(slug: string): Promise<PublicGuidePayload | null> {
+  let response: Response;
+  try { response = await fetch(`${getBaseUrl()}/api/public/${ORG_SLUG}/guides/${encodeURIComponent(slug)}`, { cache: "no-store" }); }
+  catch (error) { throw new ApiUnavailableError(`fetch guide "${slug}"`, { cause: error }); }
+  if (response.status === 404) return null;
+  if (!response.ok) throw new ApiUnavailableError(`guide "${slug}" → HTTP ${response.status}`);
+  const json: unknown = await response.json();
+  if (!isPublicGuide(json)) throw new MalformedResponseError(`guide "${slug}" → shape inattesa`);
+  return json;
+}
+
+export async function listPublicGuides(params: GuideFilters = {}): Promise<PublicGuideListResponse> {
+  const search = new URLSearchParams();
+  for (const key of ["area","topic","tag","limit","offset"] as const) if (params[key] !== undefined) search.set(key,String(params[key]));
+  let response: Response;
+  try { response = await fetch(`${getBaseUrl()}/api/public/${ORG_SLUG}/guides${search.size ? `?${search}` : ""}`, { cache: "no-store" }); }
+  catch (error) { throw new ApiUnavailableError("list guides", { cause: error }); }
+  if (!response.ok) throw new ApiUnavailableError(`list guides → HTTP ${response.status}`);
+  const json: unknown = await response.json();
+  if (!isPlainObject(json) || !Array.isArray(json.items) || !json.items.every(isPublicGuide)) throw new MalformedResponseError("list guides → shape inattesa");
+  return { items: json.items, limit: typeof json.limit === "number" ? json.limit : 20, offset: typeof json.offset === "number" ? json.offset : 0 };
+}
+
+export async function listAllPublicGuides(): Promise<PublicGuidePayload[]> {
+  const items: PublicGuidePayload[]=[]; for(let offset=0;offset<1000;offset+=50){const page=await listPublicGuides({limit:50,offset});items.push(...page.items);if(page.items.length<50)break;} return items;
 }
 
 /**

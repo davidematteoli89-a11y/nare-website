@@ -5,7 +5,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/EmptyState";
 import { Input } from "@/components/Input";
 import { LinkButton } from "@/components/Button";
-import type { PublicRecipePayload } from "@/lib/aidady-api";
+import type { PublicGuidePayload, PublicRecipePayload } from "@/lib/aidady-api";
 import { searchRecipes } from "@/lib/discovery";
 
 /**
@@ -16,10 +16,12 @@ import { searchRecipes } from "@/lib/discovery";
  * title/excerpt/category/tags/materials. Il dataset (tutte le ricette
  * pubblicate) viene passato già caricato dal Server Component genitore.
  */
-export function SearchClient({ recipes }: { recipes: PublicRecipePayload[] }) {
+export function SearchClient({ recipes, guides }: { recipes: PublicRecipePayload[]; guides: PublicGuidePayload[] }) {
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => (query.trim() ? searchRecipes(recipes, query) : []), [recipes, query]);
+  const guideResults = useMemo(() => { const q=query.trim().toLocaleLowerCase("it"); return q ? guides.filter(g=>[g.title,g.excerpt??"",g.area?.name??"",g.topic?.name??"",...g.tags].join(" ").toLocaleLowerCase("it").includes(q)) : []; }, [guides,query]);
+  const total=results.length+guideResults.length;
 
   return (
     <div>
@@ -39,7 +41,7 @@ export function SearchClient({ recipes }: { recipes: PublicRecipePayload[] }) {
           <p className="text-body text-[var(--color-foreground-muted)]">
             Cerca per ingrediente, materiale, categoria o bisogno — es. &quot;aceto&quot; o &quot;pulire&quot;.
           </p>
-        ) : results.length === 0 ? (
+        ) : total === 0 ? (
           <EmptyState
             title="Non abbiamo ancora trovato qualcosa che corrisponda esattamente."
             description="Prova un altro termine, oppure esplora tutte le preparazioni MeLoProduco."
@@ -47,7 +49,7 @@ export function SearchClient({ recipes }: { recipes: PublicRecipePayload[] }) {
         ) : (
           <>
             <p className="text-small mb-4 text-[var(--color-foreground-muted)]">
-              {results.length} {results.length === 1 ? "risultato" : "risultati"} per &quot;{query.trim()}&quot;
+              {total} {total === 1 ? "risultato" : "risultati"} per &quot;{query.trim()}&quot;
             </p>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((recipe) => (
@@ -61,6 +63,7 @@ export function SearchClient({ recipes }: { recipes: PublicRecipePayload[] }) {
                   </Link>
                 </li>
               ))}
+              {guideResults.map((guide) => <li key={`guide-${guide.slug}`}><Link href={`/guide/${guide.slug}`} className="group block h-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-shadow hover:shadow-[var(--shadow-md)]"><p className="text-meta mb-2 text-[var(--color-accent-text)]">Guida · {guide.topic?.name??guide.area?.name??"MeLoProduco"}</p><h3 className="text-h3 group-hover:text-[var(--color-accent-text)]">{guide.title}</h3>{guide.excerpt&&<p className="text-small mt-2 line-clamp-2 text-[var(--color-foreground-muted)]">{guide.excerpt}</p>}</Link></li>)}
             </ul>
           </>
         )}

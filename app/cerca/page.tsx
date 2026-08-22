@@ -3,7 +3,7 @@ import { Container } from "@/components/Container";
 import { SectionHeader } from "@/components/SectionHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { SearchClient } from "@/components/discovery/SearchClient";
-import { listAllPublicRecipes } from "@/lib/aidady-api";
+import { listAllPublicGuides, listAllPublicRecipes } from "@/lib/aidady-api";
 
 export const metadata: Metadata = {
   title: "Cerca",
@@ -23,28 +23,28 @@ export const metadata: Metadata = {
  * filtro .includes() nel browser (Client Component).
  */
 export default async function SearchPage() {
-  const recipes = await safeLoadAllRecipes();
+  const content = await safeLoadContent();
 
   return (
     <Container className="py-16" as="main">
       <SectionHeader as="h1" title="Cerca" description="Cerca in MeLoProduco: ricette, ingredienti, materiali, categorie e bisogni." />
       <div className="mt-8">
-        {recipes === null ? (
+        {content === null ? (
           <EmptyState
             title="La ricerca non è disponibile in questo momento."
             description="Riprova tra qualche minuto, oppure esplora l'archivio ricette."
           />
         ) : (
-          <SearchClient recipes={recipes} />
+          <SearchClient recipes={content.recipes} guides={content.guides} />
         )}
       </div>
     </Container>
   );
 }
 
-async function safeLoadAllRecipes() {
+async function safeLoadContent() {
   try {
-    return await listAllPublicRecipes();
+    const [recipes,guides]=await Promise.all([listAllPublicRecipes(),listAllPublicGuides()]); return {recipes,guides};
   } catch {
     return null;
   }

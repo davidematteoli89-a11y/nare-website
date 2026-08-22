@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -214,6 +215,15 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ s
         <section className="mt-12 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-6">
           <h2 className="text-h3 text-[var(--color-foreground)]">Uso</h2>
           <p className="text-body mt-3 text-[var(--color-foreground-muted)]">{recipe.usage_instructions}</p>
+        </section>
+      )}
+
+      {(recipe.related_guides?.length ?? 0) > 0 && (
+        <section className="mt-12">
+          <h2 className="text-h3 text-[var(--color-foreground)]">Approfondisci con le Guide</h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {recipe.related_guides!.map((guide) => <li key={guide.slug}><Link href={`/guide/${guide.slug}`} className="block rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 hover:shadow-[var(--shadow-md)]"><span className="font-medium">{guide.title}</span>{guide.excerpt&&<p className="text-small mt-1 text-[var(--color-foreground-muted)]">{guide.excerpt}</p>}</Link></li>)}
+          </ul>
         </section>
       )}
 

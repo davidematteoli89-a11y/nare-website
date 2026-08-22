@@ -1,22 +1,17 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-
-/**
- * Dettaglio Guida — skeleton di route (Step 1B, riverificato in Fase 7
- * Step 7A/7F).
- *
- * Audit Fase 7 (verificato leggendo il codice sorgente reale di aiDady):
- * il Public DTO per le Guide esiste già (`PublicContentPayload` in
- * lib/services/public-dto.ts — slug/title/excerpt/body/SEO/og_image_path/
- * published_at) e il flusso di publish per "content_item" è già cablato,
- * ma MANCA l'endpoint REST pubblico list/detail (nessuna route
- * app/api/public/[orgSlug]/content/... né in aiDady né nel mirror
- * aidady-public-api). Nessun content_item è oggi raggiungibile
- * pubblicamente — per questo questa pagina resta uno skeleton 404, senza
- * fetch, coerente con /guide (vedi app/guide/page.tsx per il dettaglio
- * completo del gap). Andrà costruita come detail route reale (breadcrumb,
- * hero, body rendering sicuro, Article JSON-LD) solo quando l'endpoint
- * esisterà lato aiDady.
- */
-export default function GuideDetailPage() {
-  notFound();
+import { Container } from "@/components/Container";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Eyebrow } from "@/components/Eyebrow";
+import { EmptyState } from "@/components/EmptyState";
+import { GuideMarkdown } from "@/components/GuideMarkdown";
+import { ApiUnavailableError, getPublicGuide, MalformedResponseError, resolvePublicImageUrl, type PublicGuidePayload } from "@/lib/aidady-api";
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL??"http://localhost:3000";
+type Result={status:"ok";guide:PublicGuidePayload}|{status:"not-found"}|{status:"unavailable"};
+async function load(slug:string):Promise<Result>{try{const guide=await getPublicGuide(slug);return guide?{status:"ok",guide}:{status:"not-found"};}catch(error){if(error instanceof ApiUnavailableError||error instanceof MalformedResponseError)return{status:"unavailable"};return{status:"unavailable"};}}
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const result=await load(slug);if(result.status!=="ok")return{};const g=result.guide;const image=resolvePublicImageUrl(g.og_image_path);return{title:g.seo_title||g.title,description:g.seo_description||g.excerpt||undefined,alternates:{canonical:g.canonical_url||`${siteUrl}/guide/${g.slug}`},openGraph:{type:"article",title:g.seo_title||g.title,description:g.seo_description||g.excerpt||undefined,publishedTime:g.published_at??undefined,images:image?[{url:image}]:undefined}};}
+export default async function GuideDetail({params}:{params:Promise<{slug:string}>}){const {slug}=await params;const result=await load(slug);if(result.status==="not-found")notFound();if(result.status==="unavailable")return <Container className="py-16"><EmptyState title="Questa Guida non è disponibile in questo momento." description="Riprova tra qualche minuto."/></Container>;const g=result.guide;const canonical=g.canonical_url||`${siteUrl}/guide/${g.slug}`;const articleJson=g.published_at?JSON.stringify({"@context":"https://schema.org","@type":"Article",headline:g.title,url:canonical,datePublished:g.published_at,...(g.excerpt?{description:g.excerpt}:{})}).replace(/</g,"\\u003c"):null;
+ return <Container className="py-12 sm:py-16" as="main"><Breadcrumbs items={[{label:"Narè",href:"/"},{label:"Guide",href:"/guide"},{label:g.title}]}/><article className="mx-auto mt-8 max-w-3xl"><Eyebrow>{g.topic?.name??g.area?.name??"MeLoProduco"}</Eyebrow><h1 className="text-h1 mt-3">{g.title}</h1>{g.excerpt&&<p className="text-lead mt-4 text-[var(--color-foreground-muted)]">{g.excerpt}</p>}<GuideMarkdown source={g.body}/>{g.tags.length>0&&<div className="mt-8 flex flex-wrap gap-2">{g.tags.map(tag=><span key={tag} className="text-small rounded border px-2 py-1">{tag}</span>)}</div>}</article>
+ {(g.related_recipes.length>0||g.related_guides.length>0)&&<div className="mx-auto mt-14 grid max-w-3xl gap-8 sm:grid-cols-2">{g.related_recipes.length>0&&<section><h2 className="text-h3">Ricette collegate</h2><ul className="mt-3 space-y-2">{g.related_recipes.map(item=><li key={item.slug}><Link href={`/ricette/${item.slug}`} className="underline">{item.title}</Link></li>)}</ul></section>}{g.related_guides.length>0&&<section><h2 className="text-h3">Guide correlate</h2><ul className="mt-3 space-y-2">{g.related_guides.map(item=><li key={item.slug}><Link href={`/guide/${item.slug}`} className="underline">{item.title}</Link></li>)}</ul></section>}</div>}{articleJson&&<script type="application/ld+json" dangerouslySetInnerHTML={{__html:articleJson}}/>}</Container>;
 }

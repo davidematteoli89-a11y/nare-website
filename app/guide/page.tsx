@@ -2,79 +2,16 @@ import type { Metadata } from "next";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { EmptyState } from "@/components/EmptyState";
-import { LinkButton } from "@/components/Button";
+import { EditorialCard } from "@/components/EditorialCard";
+import { listAllPublicGuides, listPublicGuides } from "@/lib/aidady-api";
 
-// Canonical/OG url derivano da NEXT_PUBLIC_SITE_URL (Fase 9B), mai
-// hardcodati: quando verrà collegato il dominio definitivo basterà
-// cambiare quella env var, senza toccare questo file.
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-const CANONICAL_URL = `${siteUrl}/guide`;
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL??"http://localhost:3000";
+export const metadata:Metadata={title:"Guide & Approfondimenti",description:"Guide pratiche MeLoProduco per casa, cucina, autoproduzione e vita quotidiana.",alternates:{canonical:`${siteUrl}/guide`}};
 
-export const metadata: Metadata = {
-  title: "Guide & Approfondimenti",
-  description: "Guide & Approfondimenti MeLoProduco: contenuti per capire meglio casa, autoproduzione, ingredienti, pratiche e vita quotidiana.",
-  alternates: { canonical: CANONICAL_URL },
-  openGraph: {
-    title: "Guide & Approfondimenti",
-    description: "Contenuti per capire meglio casa, autoproduzione, ingredienti, pratiche e vita quotidiana.",
-    url: CANONICAL_URL,
-    type: "website",
-  },
-};
-
-/**
- * /guide — Guide & Approfondimenti, archivio definitivo (Fase 7, Step
- * 7A-7E).
- *
- * GAP BACKEND DOCUMENTATO (Step 7A/7B, verificato leggendo il codice
- * sorgente reale di aiDady, non assunto):
- * - Il Public DTO per le Guide esiste già: `PublicContentPayload` in
- *   lib/services/public-dto.ts (aiDady) — { slug, title, excerpt, body,
- *   seo_title, seo_description, canonical_url, og_image_path,
- *   published_at }. Nessun topic/category pubblico.
- * - Il flusso di publish per entity_type "content_item" è già cablato in
- *   lib/services/publications.ts, incluso il constraint DB e la RLS anon
- *   (supabase/migrations/20260815124103_publishing_layer.sql,
- *   20260817140000_publications_anon_select.sql).
- * - MANCA SOLO l'endpoint REST pubblico: nessuna route
- *   app/api/public/[orgSlug]/content/route.ts (list) né .../content/
- *   [slug]/route.ts (detail), né in aiDady né nel mirror
- *   aidady-public-api. Nessun content_item è oggi raggiungibile
- *   pubblicamente.
- * - Decisione Fase 7 (Step 7B, confermata dal cliente): NON modificare
- *   aiDady in questa fase. Questa pagina resta quindi un archivio
- *   editoriale con empty state onesto, SENZA alcun client API scritto
- *   qui — verrà aggiunto in lib/aidady-api.ts (stesso pattern di
- *   listPublicRecipes/listPublicWorkshops) solo quando l'endpoint reale
- *   esisterà lato aiDady. Nessun CMS locale secondo creato (vincolo
- *   esplicito Step 7B).
- */
-export default function GuidePage() {
-  return (
-    <Container className="py-16 sm:py-20">
-      <Eyebrow>MeLoProduco</Eyebrow>
-      <h1 className="text-hero-display mt-3 max-w-2xl text-[var(--color-foreground)]">Guide & Approfondimenti</h1>
-      <p className="text-lead mt-5 max-w-xl text-[var(--color-foreground-muted)]">
-        Contenuti per capire meglio casa, autoproduzione, ingredienti, pratiche e vita quotidiana — lo stesso metodo di
-        MeLoProduco, applicato agli approfondimenti.
-      </p>
-
-      <div className="mt-12 text-center">
-        <div className="mx-auto max-w-lg">
-          <EmptyState
-            title="Le Guide MeLoProduco stanno prendendo forma."
-            description="Qui troveranno spazio approfondimenti e contenuti per comprendere meglio ciò che facciamo."
-          />
-        </div>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <LinkButton href="/meloproduco" variant="secondary">
-            Scopri MeLoProduco
-          </LinkButton>
-          <LinkButton href="/ricette" variant="ghost">
-            Esplora le ricette
-          </LinkButton>
-        </div>
-      </div>
-    </Container>
-  );
+export default async function GuidePage({searchParams}:{searchParams:Promise<{area?:string;topic?:string;tag?:string}>}){
+ const filters=await searchParams; let guides=null;let all=null;try{[guides,all]=await Promise.all([listPublicGuides({...filters,limit:50}),listAllPublicGuides()]);}catch{}
+ const areas=new Map<string,string>(),topics=new Map<string,string>();const tags=new Set<string>();for(const guide of all??[]){if(guide.area)areas.set(guide.area.slug,guide.area.name);if(guide.topic)topics.set(guide.topic.slug,guide.topic.name);guide.tags.forEach(t=>tags.add(t));}
+ return <Container className="py-16 sm:py-20" as="main"><Eyebrow>MeLoProduco</Eyebrow><h1 className="text-hero-display mt-3">Guide & Approfondimenti</h1><p className="text-lead mt-5 max-w-2xl text-[var(--color-foreground-muted)]">Approfondimenti pratici per capire, scegliere e autoprodurre con consapevolezza.</p>
+ <form className="mt-10 grid gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 sm:grid-cols-4" method="get"><select name="area" defaultValue={filters.area??""} className="rounded border p-2"><option value="">Tutte le Aree</option>{[...areas].map(([slug,name])=><option key={slug} value={slug}>{name}</option>)}</select><select name="topic" defaultValue={filters.topic??""} className="rounded border p-2"><option value="">Tutti gli Argomenti</option>{[...topics].map(([slug,name])=><option key={slug} value={slug}>{name}</option>)}</select><select name="tag" defaultValue={filters.tag??""} className="rounded border p-2"><option value="">Tutti i tag</option>{[...tags].sort().map(tag=><option key={tag}>{tag}</option>)}</select><button className="rounded bg-[var(--color-accent)] px-4 py-2 text-white">Filtra</button></form>
+ <div className="mt-10">{guides===null?<EmptyState title="Le Guide non sono disponibili in questo momento." description="Riprova tra qualche minuto."/>:guides.items.length===0?<EmptyState title="Nessuna Guida pubblicata per questi filtri." description="Cambia Area o Argomento, oppure torna presto."/>:<ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{guides.items.map(guide=><li key={guide.slug}><EditorialCard href={`/guide/${guide.slug}`} title={guide.title} excerpt={guide.excerpt??undefined} category={guide.topic?.name??guide.area?.name} imageSrc="/images/placeholders/editorial-generic.png" imageAlt=""/></li>)}</ul>}</div></Container>;
 }

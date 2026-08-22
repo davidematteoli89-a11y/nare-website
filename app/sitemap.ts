@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { listPublicRecipes, listPublicWorkshops } from "@/lib/aidady-api";
+import { listPublicGuides, listPublicRecipes, listPublicWorkshops } from "@/lib/aidady-api";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -45,9 +45,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const recipeEntries = await safeRecipeSitemapEntries();
   const workshopEntries = await safeWorkshopSitemapEntries();
+  const guideEntries = await safeGuideSitemapEntries();
 
-  return [...staticEntries, ...recipeEntries, ...workshopEntries];
+  return [...staticEntries, ...recipeEntries, ...guideEntries, ...workshopEntries];
 }
+
+async function safeGuideSitemapEntries(): Promise<MetadataRoute.Sitemap> { try { const {items}=await listPublicGuides({limit:50}); return items.map(guide=>({url:`${siteUrl}/guide/${guide.slug}`,lastModified:guide.published_at?new Date(guide.published_at):new Date()})); } catch { return []; } }
 
 async function safeRecipeSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   try {
