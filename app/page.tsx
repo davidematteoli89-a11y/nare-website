@@ -9,7 +9,7 @@ import { EditorialCard } from "@/components/EditorialCard";
 import { NewsletterFormShell } from "@/components/NewsletterFormShell";
 import { VideoCard } from "@/components/VideoCard";
 import { FUTURE_NAV } from "@/lib/nav";
-import { listPublicRecipes, listPublicWorkshops, resolvePublicImageUrl, type PublicWorkshopPayload } from "@/lib/aidady-api";
+import { listPublicGuides, listPublicRecipes, listPublicWorkshops, resolvePublicImageUrl, type PublicGuidePayload, type PublicWorkshopPayload } from "@/lib/aidady-api";
 import { raiAppearances } from "@/lib/rai-appearances";
 import { formatDateIt } from "@/lib/format";
 import { Badge } from "@/components/Badge";
@@ -32,14 +32,18 @@ import { Badge } from "@/components/Badge";
  * risponde (Step 2X) — mai un 500, mai stack trace in pagina.
  */
 export default async function HomePage() {
-  const recipes = await safeListRecipes();
-  const workshops = await safeListWorkshops();
+  const [recipes, guides, workshops] = await Promise.all([
+    safeListRecipes(),
+    safeListGuides(),
+    safeListWorkshops(),
+  ]);
 
   return (
     <>
       <Hero />
       <MondiNare />
       <MeLoProducoSection recipes={recipes} />
+      <GuideSection guides={guides} />
       <IncontriSection workshops={workshops} />
       <CristinaSection />
       <CristinaInRaiSection />
@@ -47,6 +51,15 @@ export default async function HomePage() {
       <NewsletterSection />
     </>
   );
+}
+
+async function safeListGuides() {
+  try {
+    const res = await listPublicGuides({ limit: 3 });
+    return res.items;
+  } catch {
+    return null;
+  }
 }
 
 /** Step 2X: mai propagare l'errore alla pagina — la sezione dinamica si nasconde/fa fallback. */
@@ -249,6 +262,46 @@ function MeLoProducoSection({ recipes }: { recipes: Awaited<ReturnType<typeof sa
         </div>
       </div>
     </Container>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* GUIDE — biblioteca editoriale Narè                                     */
+/* ---------------------------------------------------------------------- */
+
+function GuideSection({ guides }: { guides: PublicGuidePayload[] | null }) {
+  return (
+    <div className="border-y border-[var(--color-border)] bg-[var(--color-surface)]">
+      <Container className="py-16 sm:py-20">
+        <SectionHeader
+          eyebrow="Guide & approfondimenti"
+          title="Capire, prima di fare"
+          description="Ingredienti, pratiche e gesti quotidiani spiegati con chiarezza, per scegliere e autoprodurre con più consapevolezza."
+          action={<LinkButton href="/guide" variant="secondary" size="sm">Tutte le Guide</LinkButton>}
+        />
+        <div className="mt-8">
+          {guides === null ? (
+            <EmptyState title="Le Guide non sono disponibili in questo momento." description="Riprova tra qualche minuto oppure visita l’archivio dedicato." />
+          ) : guides.length === 0 ? (
+            <EmptyState title="Le prime Guide stanno prendendo forma." description="Compariranno qui dopo la pubblicazione editoriale." />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {guides.map((guide) => (
+                <EditorialCard
+                  key={guide.slug}
+                  href={`/guide/${guide.slug}`}
+                  title={guide.title}
+                  excerpt={guide.excerpt ?? undefined}
+                  category={guide.topic?.name ?? guide.area?.name}
+                  imageSrc={resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
+                  imageAlt={guide.title}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </Container>
+    </div>
   );
 }
 
