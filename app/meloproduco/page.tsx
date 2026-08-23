@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { LinkButton } from "@/components/Button";
 import { EmptyState } from "@/components/EmptyState";
 import { EditorialCard } from "@/components/EditorialCard";
-import { listPublicGuides, listPublicRecipes, listAllPublicRecipes, extractAvailableFilters, resolvePublicImageUrl, type PublicGuidePayload, type PublicRecipePayload } from "@/lib/aidady-api";
+import { listPublicGuides, listPublicRecipes, resolvePublicImageUrl, type PublicGuidePayload, type PublicRecipePayload } from "@/lib/aidady-api";
 import { FEATURED_NEEDS } from "@/lib/discovery";
 
 /**
@@ -44,14 +44,12 @@ export const metadata: Metadata = {
 
 export default async function MeLoProducoPage() {
   const recipes = await safeListRecentRecipes();
-  const categories = await safeListCategories();
   const guides = await safeListRecentGuides();
 
   return (
     <>
       <Hero />
       <CosaVuoiFare />
-      <EsploraCategorie categories={categories} />
       <CosaTrovi />
       <UltimeRicette recipes={recipes} />
       <Metodo />
@@ -76,22 +74,6 @@ async function safeListRecentRecipes(): Promise<PublicRecipePayload[] | null> {
     return res.items;
   } catch {
     return null; // null = API irraggiungibile/malformata, distinto da [] = nessuna ricetta pubblicata
-  }
-}
-
-/**
- * Categorie REALI derivate dalle ricette pubblicate (Fase 11, Step 11P) —
- * mai hardcodate: se oggi nessuna ricetta ha ancora una categoria assegnata
- * in backoffice (stato normale finché un editor non compila i dati), la
- * lista è vuota e la sezione degrada con un messaggio editoriale invece di
- * sparire nel nulla o mostrare card finte.
- */
-async function safeListCategories(): Promise<{ slug: string; name: string }[] | null> {
-  try {
-    const all = await listAllPublicRecipes();
-    return extractAvailableFilters(all).categories;
-  } catch {
-    return null;
   }
 }
 
@@ -151,54 +133,6 @@ function CosaVuoiFare() {
           <LinkButton href="/meloproduco/cosa-hai-in-casa" variant="secondary" size="sm">
             Oppure parti da cosa hai già in casa
           </LinkButton>
-        </div>
-      </Container>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------------- */
-/* ESPLORA MELOPRODUCO — categorie reali, Step 11P                        */
-/* ---------------------------------------------------------------------- */
-
-function EsploraCategorie({ categories }: { categories: { slug: string; name: string }[] | null }) {
-  // Step 11P: se non c'è ancora nessuna categoria reale (API ok ma dataset
-  // vuoto), la sezione degrada con un messaggio editoriale coerente invece
-  // di sparire o sembrare rotta. Se l'API è irraggiungibile (null), la
-  // sezione si nasconde del tutto: non è un contenuto essenziale della
-  // pagina, meglio ometterla che mostrare un errore.
-  if (categories === null) return null;
-
-  return (
-    <div className="bg-[var(--color-surface-subtle)]">
-      <Container className="py-16 sm:py-20">
-        <SectionHeader eyebrow="Categorie" title="Esplora MeLoProduco" />
-        <div className="mt-8">
-          {categories.length === 0 ? (
-            <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)] p-8 text-center sm:p-10">
-              <p className="text-h3 text-[var(--color-foreground)]">Le categorie arriveranno presto.</p>
-              <p className="text-small mx-auto mt-2 max-w-md text-[var(--color-foreground-muted)]">
-                Stiamo organizzando le ricette per area: nel frattempo puoi esplorare l&apos;archivio completo.
-              </p>
-              <div className="mt-5">
-                <LinkButton href="/ricette" variant="secondary" size="sm">
-                  Vai alle ricette
-                </LinkButton>
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((category) => (
-                <Link
-                  key={category.slug}
-                  href={`/ricette?category=${category.slug}`}
-                  className="group rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-shadow hover:shadow-[var(--shadow-md)]"
-                >
-                  <p className="text-h3 text-[var(--color-foreground)] group-hover:text-[var(--color-accent-text)]">{category.name}</p>
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       </Container>
     </div>
