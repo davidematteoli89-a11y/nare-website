@@ -164,12 +164,23 @@ export interface PublicRecipePayload {
 
 export interface PublicRelatedContent { slug: string; title: string; excerpt: string | null; og_image_path: string | null; }
 
+export interface PublicGuideMedia {
+  type: "image" | "video_upload" | "youtube" | "instagram_reel" | "external_video";
+  provider: "supabase" | "youtube" | "instagram" | "external";
+  url: string;
+  thumbnail_url: string | null;
+  title: string | null;
+  caption: string | null;
+  alt_text: string | null;
+}
+
 export interface PublicGuidePayload {
   slug: string; title: string; excerpt: string | null; body: string;
   seo_title: string | null; seo_description: string | null; canonical_url: string | null;
   og_image_path: string | null; published_at: string | null; content_type: "guide";
   area: { slug: string; name: string } | null; topic: { slug: string; name: string } | null;
   tags: string[]; related_recipes: PublicRelatedContent[]; related_guides: PublicRelatedContent[];
+  cover_image: PublicGuideMedia | null; gallery: PublicGuideMedia[]; media: PublicGuideMedia | null;
 }
 
 export interface PublicGuideListResponse { items: PublicGuidePayload[]; limit: number; offset: number; }
@@ -224,7 +235,21 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isPublicGuide(value: unknown): value is PublicGuidePayload {
-  return isPlainObject(value) && typeof value.slug === "string" && typeof value.title === "string" && typeof value.body === "string" && value.content_type === "guide" && Array.isArray(value.tags) && Array.isArray(value.related_recipes) && Array.isArray(value.related_guides);
+  return isPlainObject(value) && typeof value.slug === "string" && typeof value.title === "string" && typeof value.body === "string" && value.content_type === "guide" && Array.isArray(value.tags) && Array.isArray(value.related_recipes) && Array.isArray(value.related_guides)
+    && (value.cover_image === undefined || value.cover_image === null || isPublicGuideMedia(value.cover_image))
+    && (value.gallery === undefined || (Array.isArray(value.gallery) && value.gallery.every(isPublicGuideMedia)))
+    && (value.media === undefined || value.media === null || isPublicGuideMedia(value.media));
+}
+
+function isPublicGuideMedia(value: unknown): value is PublicGuideMedia {
+  if (!isPlainObject(value)) return false;
+  return ["image", "video_upload", "youtube", "instagram_reel", "external_video"].includes(String(value.type))
+    && ["supabase", "youtube", "instagram", "external"].includes(String(value.provider))
+    && typeof value.url === "string";
+}
+
+function normalizePublicGuide(value: PublicGuidePayload): PublicGuidePayload {
+  return { ...value, cover_image: value.cover_image ?? null, gallery: value.gallery ?? [], media: value.media ?? null };
 }
 
 export async function getPublicGuide(slug: string): Promise<PublicGuidePayload | null> {
@@ -235,7 +260,7 @@ export async function getPublicGuide(slug: string): Promise<PublicGuidePayload |
   if (!response.ok) throw new ApiUnavailableError(`guide "${slug}" → HTTP ${response.status}`);
   const json: unknown = await response.json();
   if (!isPublicGuide(json)) throw new MalformedResponseError(`guide "${slug}" → shape inattesa`);
-  return json;
+  return normalizePublicGuide(json);
 }
 
 export async function listPublicGuides(params: GuideFilters = {}): Promise<PublicGuideListResponse> {
@@ -247,7 +272,7 @@ export async function listPublicGuides(params: GuideFilters = {}): Promise<Publi
   if (!response.ok) throw new ApiUnavailableError(`list guides → HTTP ${response.status}`);
   const json: unknown = await response.json();
   if (!isPlainObject(json) || !Array.isArray(json.items) || !json.items.every(isPublicGuide)) throw new MalformedResponseError("list guides → shape inattesa");
-  return { items: json.items, limit: typeof json.limit === "number" ? json.limit : 20, offset: typeof json.offset === "number" ? json.offset : 0 };
+  return { items: json.items.map(normalizePublicGuide), limit: typeof json.limit === "number" ? json.limit : 20, offset: typeof json.offset === "number" ? json.offset : 0 };
 }
 
 export async function listAllPublicGuides(): Promise<PublicGuidePayload[]> {

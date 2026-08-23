@@ -70,13 +70,17 @@ export default function CookiePage() {
 
       <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Video incorporati (YouTube)</h2>
       <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
-        Alcuni contenuti video (interventi RAI di Cristina) possono essere incorporati tramite il player YouTube in
+        Alcuni contenuti video (interventi RAI di Cristina e tutorial nelle Guide) possono essere incorporati tramite il player YouTube in
         modalità privacy-enhanced (<code>youtube-nocookie.com</code>), che riduce l&apos;uso di cookie rispetto
         all&apos;embed YouTube standard. Il player viene caricato solo se scegli attivamente di avviare la
         riproduzione di un video, mai automaticamente al caricamento della pagina. Una volta avviato il video, Google
         può comunque installare i propri cookie secondo la sua informativa. [DA VALIDARE: verificare se, al momento
         del go-live, l&apos;embed YouTube in modalità privacy-enhanced richieda comunque un consenso preventivo
         secondo le linee guida applicabili.]
+      </p>
+      <p className="mt-3 text-sm text-[var(--color-foreground-muted)]">
+        I Reel Instagram e gli altri video esterni presenti nelle Guide vengono mostrati come semplici collegamenti:
+        il sito non carica automaticamente script o SDK di Meta né iframe forniti da siti esterni.
       </p>
 
       <h2 className="mt-8 text-lg font-medium text-[var(--color-foreground)]">Nessun banner di consenso cookie</h2>
