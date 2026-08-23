@@ -78,13 +78,13 @@ function Hero() {
     <section className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
       <Container className="grid gap-8 py-16 sm:py-24 lg:grid-cols-2 lg:items-center">
         <div>
-          <Eyebrow>Narè, con Cristina di Narè</Eyebrow>
+          <Eyebrow>Narè, con Cristina Nigrelli.</Eyebrow>
           <h1 className="text-hero-display mt-4 text-[var(--color-foreground)]">
             Imparare facendo, vivere con più consapevolezza.
           </h1>
           <p className="text-lead mt-5 max-w-md text-[var(--color-foreground-muted)]">
             Narè unisce esperienza, educazione e manualità: autoproduzione, incontri dal vivo e pratiche quotidiane, con
-            Cristina di Narè come filo conduttore.
+            Cristina Nigrelli come filo conduttore.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <LinkButton href="/cristina">Scopri Narè</LinkButton>
