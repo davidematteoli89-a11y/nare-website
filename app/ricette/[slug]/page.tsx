@@ -7,6 +7,8 @@ import { Eyebrow } from "@/components/Eyebrow";
 import { RecipeImage } from "@/components/RecipeImage";
 import { EmptyState } from "@/components/EmptyState";
 import { LinkButton } from "@/components/Button";
+import { GuideTutorial } from "@/components/GuideTutorial";
+import { MediaGallerySlider } from "@/components/MediaGallerySlider";
 import {
   getPublicRecipe,
   resolvePublicImageUrl,
@@ -65,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { recipe } = result;
   const title = recipe.seo_title || recipe.title;
   const description = recipe.seo_description || recipe.excerpt || undefined;
-  const imageUrl = resolvePublicImageUrl(recipe.og_image_path);
+  const imageUrl = recipe.cover_image?.url ?? resolvePublicImageUrl(recipe.og_image_path);
 
   return {
     title,
@@ -110,7 +112,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ s
   }
 
   const { recipe } = result;
-  const imageUrl = resolvePublicImageUrl(recipe.og_image_path);
+  const imageUrl = recipe.cover_image?.url ?? resolvePublicImageUrl(recipe.og_image_path);
   const jsonLd = buildRecipeJsonLd(recipe, imageUrl);
 
   return (
@@ -131,7 +133,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ s
           <h1 className="text-h1 mt-3 text-[var(--color-foreground)]">{recipe.title}</h1>
           {recipe.excerpt && <p className="text-lead mt-4 max-w-xl text-[var(--color-foreground-muted)]">{recipe.excerpt}</p>}
         </div>
-        <RecipeImage src={imageUrl} alt={recipe.title} priority className="aspect-[4/3] w-full rounded-[var(--radius-lg)] border border-[var(--color-border)]" />
+        <RecipeImage src={imageUrl} alt={recipe.cover_image?.alt_text || recipe.title} priority className="aspect-[4/3] w-full rounded-[var(--radius-lg)] border border-[var(--color-border)]" />
       </div>
 
       {/* INFORMAZIONI — solo se presenti, mai card vuote (Step 3F.3) */}
@@ -217,6 +219,9 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ s
           <p className="text-body mt-3 text-[var(--color-foreground-muted)]">{recipe.usage_instructions}</p>
         </section>
       )}
+
+      {recipe.media && <GuideTutorial media={recipe.media} guideTitle={recipe.title} />}
+      <MediaGallerySlider images={recipe.gallery} title="Galleria della ricetta" />
 
       {(recipe.related_guides?.length ?? 0) > 0 && (
         <section className="mt-12">

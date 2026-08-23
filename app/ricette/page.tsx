@@ -181,8 +181,8 @@ function RecipeCard({ recipe }: { recipe: PublicRecipePayload }) {
       href={`/ricette/${recipe.slug}`}
       title={recipe.title}
       excerpt={recipe.excerpt ?? undefined}
-      imageSrc={resolvePublicImageUrl(recipe.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
-      imageAlt={recipe.title}
+      imageSrc={recipe.cover_image?.url ?? resolvePublicImageUrl(recipe.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
+      imageAlt={recipe.cover_image?.alt_text || recipe.title}
     />
   );
 }

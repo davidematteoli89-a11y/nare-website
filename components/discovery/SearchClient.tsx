@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { EmptyState } from "@/components/EmptyState";
 import { Input } from "@/components/Input";
 import { LinkButton } from "@/components/Button";
+import { EditorialCard } from "@/components/EditorialCard";
 import type { PublicGuidePayload, PublicRecipePayload } from "@/lib/aidady-api";
+import { resolvePublicImageUrl } from "@/lib/public-image";
 import { searchRecipes } from "@/lib/discovery";
 
 /**
@@ -54,16 +55,10 @@ export function SearchClient({ recipes, guides }: { recipes: PublicRecipePayload
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((recipe) => (
                 <li key={recipe.slug}>
-                  <Link
-                    href={`/ricette/${recipe.slug}`}
-                    className="group block h-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-shadow hover:shadow-[var(--shadow-md)]"
-                  >
-                    <h3 className="text-h3 text-[var(--color-foreground)] group-hover:text-[var(--color-accent-text)]">{recipe.title}</h3>
-                    {recipe.excerpt && <p className="text-small mt-2 line-clamp-2 text-[var(--color-foreground-muted)]">{recipe.excerpt}</p>}
-                  </Link>
+                  <EditorialCard href={`/ricette/${recipe.slug}`} title={recipe.title} excerpt={recipe.excerpt ?? undefined} imageSrc={recipe.cover_image?.url ?? resolvePublicImageUrl(recipe.og_image_path) ?? "/images/placeholders/editorial-generic.png"} imageAlt={recipe.cover_image?.alt_text || recipe.title} />
                 </li>
               ))}
-              {guideResults.map((guide) => <li key={`guide-${guide.slug}`}><Link href={`/guide/${guide.slug}`} className="group block h-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-shadow hover:shadow-[var(--shadow-md)]"><p className="text-meta mb-2 text-[var(--color-accent-text)]">Guida · {guide.topic?.name??guide.area?.name??"MeLoProduco"}</p><h3 className="text-h3 group-hover:text-[var(--color-accent-text)]">{guide.title}</h3>{guide.excerpt&&<p className="text-small mt-2 line-clamp-2 text-[var(--color-foreground-muted)]">{guide.excerpt}</p>}</Link></li>)}
+              {guideResults.map((guide) => <li key={`guide-${guide.slug}`}><EditorialCard href={`/guide/${guide.slug}`} title={guide.title} excerpt={guide.excerpt ?? undefined} category={guide.topic?.name ?? guide.area?.name ?? "MeLoProduco"} imageSrc={guide.cover_image?.url ?? resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"} imageAlt={guide.cover_image?.alt_text || guide.title} /></li>)}
             </ul>
           </>
         )}

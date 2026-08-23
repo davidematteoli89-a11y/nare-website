@@ -247,8 +247,8 @@ function MeLoProducoSection({ recipes }: { recipes: Awaited<ReturnType<typeof sa
                 href={`/ricette/${recipe.slug}`}
                 title={recipe.title}
                 excerpt={recipe.excerpt ?? undefined}
-                imageSrc="/images/placeholders/editorial-generic.png"
-                imageAlt={recipe.title}
+                imageSrc={recipe.cover_image?.url ?? resolvePublicImageUrl(recipe.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
+                imageAlt={recipe.cover_image?.alt_text || recipe.title}
               />
             ))}
           </div>
@@ -304,8 +304,8 @@ function GuideSection({ guides }: { guides: PublicGuidePayload[] | null }) {
                   title={guide.title}
                   excerpt={guide.excerpt ?? undefined}
                   category={guide.topic?.name ?? guide.area?.name}
-                  imageSrc={resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
-                  imageAlt={guide.title}
+                  imageSrc={guide.cover_image?.url ?? resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
+                  imageAlt={guide.cover_image?.alt_text || guide.title}
                 />
               ))}
             </div>

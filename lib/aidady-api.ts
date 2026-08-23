@@ -1,4 +1,5 @@
 import "server-only";
+export { resolvePublicImageUrl } from "@/lib/public-image";
 
 /**
  * Client minimale per le API PUBBLICHE di aiDady (Step 1L, rafforzato in
@@ -160,6 +161,9 @@ export interface PublicRecipePayload {
   published_at: string | null;
   discovery: PublicDiscoveryBlock;
   related_guides?: PublicRelatedContent[];
+  cover_image: PublicGuideMedia | null;
+  gallery: PublicGuideMedia[];
+  media: PublicGuideMedia | null;
 }
 
 export interface PublicRelatedContent { slug: string; title: string; excerpt: string | null; og_image_path: string | null; }
@@ -295,7 +299,10 @@ function isPublicRecipePayload(value: unknown): value is Omit<PublicRecipePayloa
     typeof value.slug === "string" &&
     typeof value.title === "string" &&
     Array.isArray(value.ingredients) &&
-    Array.isArray(value.steps)
+    Array.isArray(value.steps) &&
+    (value.cover_image === undefined || value.cover_image === null || isPublicGuideMedia(value.cover_image)) &&
+    (value.gallery === undefined || (Array.isArray(value.gallery) && value.gallery.every(isPublicGuideMedia))) &&
+    (value.media === undefined || value.media === null || isPublicGuideMedia(value.media))
   );
 }
 
@@ -309,6 +316,9 @@ function normalizeRecipePayload(raw: Omit<PublicRecipePayload, "discovery"> & { 
   return {
     ...raw,
     discovery: isPublicDiscoveryBlock(raw.discovery) ? raw.discovery : EMPTY_DISCOVERY,
+    cover_image: raw.cover_image ?? null,
+    gallery: raw.gallery ?? [],
+    media: raw.media ?? null,
   };
 }
 
@@ -520,24 +530,6 @@ export function extractAvailableFilters(recipes: PublicRecipePayload[]): Availab
     costLevels: costOrder.filter((c) => costLevels.has(c)),
     seasons: seasonOrder.filter((s) => seasons.has(s)),
   };
-}
-
-/**
- * Valida che `og_image_path` sia effettivamente un URL assoluto http/https
- * utilizzabile da next/image. Oggi è sempre `null` (vedi commento in testa
- * al file), ma questa funzione è la guardia esplicita da usare ovunque il
- * campo venga letto, per non assumere mai che sia già un URL valido
- * (Step 3H/3I — nessun proxy, nessuno storage privato, nessuna assunzione).
- */
-export function resolvePublicImageUrl(ogImagePath: string | null): string | null {
-  if (!ogImagePath) return null;
-  try {
-    const parsed = new URL(ogImagePath);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
-    return parsed.toString();
-  } catch {
-    return null;
-  }
 }
 
 /**

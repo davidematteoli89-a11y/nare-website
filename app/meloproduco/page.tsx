@@ -206,8 +206,8 @@ function UltimeRicette({ recipes }: { recipes: PublicRecipePayload[] | null }) {
                 href={`/ricette/${recipe.slug}`}
                 title={recipe.title}
                 excerpt={recipe.excerpt ?? undefined}
-                imageSrc={resolvePublicImageUrl(recipe.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
-                imageAlt={recipe.title}
+                imageSrc={recipe.cover_image?.url ?? resolvePublicImageUrl(recipe.og_image_path) ?? "/images/placeholders/editorial-generic.png"}
+                imageAlt={recipe.cover_image?.alt_text || recipe.title}
               />
             ))}
           </div>
@@ -262,7 +262,7 @@ function Guide({ guides }: { guides: PublicGuidePayload[] | null }) {
           <EmptyState title="Le prime Guide MeLoProduco stanno prendendo forma." description="Compariranno qui dopo l’approvazione e la pubblicazione editoriale." />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {guides.map((guide) => <EditorialCard key={guide.slug} href={`/guide/${guide.slug}`} title={guide.title} excerpt={guide.excerpt ?? undefined} category={guide.topic?.name ?? guide.area?.name} imageSrc={resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"} imageAlt={guide.title} />)}
+            {guides.map((guide) => <EditorialCard key={guide.slug} href={`/guide/${guide.slug}`} title={guide.title} excerpt={guide.excerpt ?? undefined} category={guide.topic?.name ?? guide.area?.name} imageSrc={guide.cover_image?.url ?? resolvePublicImageUrl(guide.og_image_path) ?? "/images/placeholders/editorial-generic.png"} imageAlt={guide.cover_image?.alt_text || guide.title} />)}
           </div>
         )}
       </div>

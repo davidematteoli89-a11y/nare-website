@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/Eyebrow";
 import { EmptyState } from "@/components/EmptyState";
 import { GuideMarkdown } from "@/components/GuideMarkdown";
 import { GuideTutorial } from "@/components/GuideTutorial";
+import { MediaGallerySlider } from "@/components/MediaGallerySlider";
 import {
   ApiUnavailableError,
   getPublicGuide,
@@ -82,20 +83,7 @@ export default async function GuideDetail({ params }: { params: Promise<{ slug: 
         <GuideMarkdown source={guide.body} />
         {guide.media && <GuideTutorial media={guide.media} guideTitle={guide.title} />}
 
-        {guide.gallery.length > 0 && (
-          <section className="mt-10" aria-labelledby="guide-gallery-title">
-            <h2 id="guide-gallery-title" className="text-h2 text-[var(--color-foreground)]">Galleria</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {guide.gallery.map((image, index) => (
-                <figure key={`${image.url}-${index}`} className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={image.url} alt={image.alt_text || ""} loading="lazy" className="aspect-[4/3] w-full object-cover" />
-                  {image.caption && <figcaption className="p-3 text-small text-[var(--color-foreground-muted)]">{image.caption}</figcaption>}
-                </figure>
-              ))}
-            </div>
-          </section>
-        )}
+        <MediaGallerySlider images={guide.gallery} />
 
         {guide.tags.length > 0 && <div className="mt-8 flex flex-wrap gap-2">{guide.tags.map((tag) => <span key={tag} className="text-small rounded border px-2 py-1">{tag}</span>)}</div>}
       </article>

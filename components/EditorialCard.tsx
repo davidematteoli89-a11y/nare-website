@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Badge } from "./Badge";
 
 /**
@@ -33,12 +32,13 @@ export function EditorialCard({
       className="group block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] transition-shadow duration-200 hover:shadow-[var(--shadow-md)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-surface-subtle)]">
-        <Image
+        {/* URL HTTPS prodotto dal payload pubblico aiDady; il tag nativo supporta anche lo storage Media senza vincolare il sito a un singolo host. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={imageSrc}
           alt={imageAlt}
-          fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover"
+          loading="lazy"
+          className="h-full w-full object-cover"
         />
       </div>
       <div className="p-5">

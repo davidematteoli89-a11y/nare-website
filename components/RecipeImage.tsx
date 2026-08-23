@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 /**
@@ -29,7 +28,8 @@ export function RecipeImage({
   if (src) {
     return (
       <div className={cn("relative overflow-hidden bg-[var(--color-surface-subtle)]", className)}>
-        <Image src={src} alt={alt} fill priority={priority} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={alt} fetchPriority={priority ? "high" : "auto"} className="h-full w-full object-cover" />
       </div>
     );
   }
