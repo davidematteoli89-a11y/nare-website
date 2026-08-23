@@ -171,11 +171,11 @@ function MondiNare() {
           </Link>
         </div>
 
-        {/* Ritiri, Famiglie, In Viaggio — Fase 6: le route esistono davvero
+        {/* Ritiri, Famiglie, In Viaggio e Occasioni speciali: le route esistono davvero
             ora, quindi sono card cliccabili, ma restano volutamente più
             leggere di MeLoProduco/Incontri (bordo tratteggiato, nessuna
-            immagine) per non presentare 5 sezioni come identiche. */}
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            immagine). */}
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {FUTURE_NAV.map((area) => {
             const descriptions: Record<string, string> = {
               "/ritiri": "Esperienze più immersive, tra natura e manualità.",
@@ -195,6 +195,17 @@ function MondiNare() {
               </Link>
             );
           })}
+          <Link
+            href="/occasioni-speciali"
+            className="group rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)] p-5 transition-colors hover:border-[var(--color-accent)]"
+          >
+            <p className="text-small font-semibold text-[var(--color-foreground)] group-hover:text-[var(--color-accent-text)]">
+              Narè Occasioni speciali
+            </p>
+            <p className="text-meta mt-1.5 text-[var(--color-foreground-muted)]">
+              Esperienze da condividere, creare e ricordare insieme.
+            </p>
+          </Link>
         </div>
       </Container>
     </div>
