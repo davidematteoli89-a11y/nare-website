@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "./Container";
 import { MobileNav } from "./MobileNav";
 import { PRIMARY_NAV } from "@/lib/nav";
@@ -13,9 +14,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-background)]/95 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="text-h3 text-[var(--color-foreground)]">
-          Narè
-          <span className="sr-only"> — con Cristina di Narè</span>
+        <Link href="/" aria-label="Narè — torna alla homepage" className="shrink-0">
+          <Image
+            src="/images/branding/logo-nare.png"
+            alt="Narè"
+            width={48}
+            height={48}
+            priority
+            className="h-12 w-12 rounded-full object-cover"
+          />
         </Link>
 
         <nav aria-label="Navigazione principale" className="hidden md:block">
