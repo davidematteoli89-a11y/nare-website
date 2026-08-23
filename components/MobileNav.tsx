@@ -1,13 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
+import Image from "next/image";
 import { PRIMARY_NAV } from "@/lib/nav";
 import { NewsletterFormShell } from "./NewsletterFormShell";
 
 /** Menu mobile compatto: hamburger + drawer leggero, senza dipendenze esterne (Step 1C, 1G). */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
 
   return (
     <div className="md:hidden">
@@ -24,12 +40,12 @@ export function MobileNav() {
         </span>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex">
+      {open && createPortal(
+        <div className="fixed inset-0 z-[100]">
           <button
             type="button"
             aria-label="Chiudi menu"
-            className="flex-1 bg-[var(--color-foreground)]/30"
+            className="absolute inset-0 bg-black/45"
             onClick={() => setOpen(false)}
           />
           <div
@@ -37,10 +53,12 @@ export function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-label="Menu di navigazione"
-            className="flex h-full w-72 max-w-[85vw] flex-col gap-6 bg-[var(--color-surface)] p-6 shadow-[var(--shadow-md)]"
+            className="absolute inset-y-0 right-0 flex w-[88vw] max-w-sm flex-col gap-6 overflow-y-auto overscroll-contain bg-white p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between">
-              <span className="text-h3 text-[var(--color-foreground)]">Narè</span>
+              <Link href="/" aria-label="Narè — torna alla homepage" onClick={() => setOpen(false)}>
+                <Image src="/images/branding/logo-nare.png" alt="Narè" width={48} height={48} className="h-12 w-12 rounded-full object-cover" />
+              </Link>
               <button
                 type="button"
                 aria-label="Chiudi menu"
@@ -81,7 +99,8 @@ export function MobileNav() {
               <NewsletterFormShell />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
