@@ -123,6 +123,7 @@ export default async function IncontriPage() {
         />
         <div className="mt-5">
           <LinkButton href="/porta-nare-da-te?tipo=incontro">Porta Narè da te</LinkButton>
+          <LinkButton href="/occasioni-speciali" variant="link" className="ml-4">Scopri le occasioni speciali</LinkButton>
         </div>
       </Container>
     </>

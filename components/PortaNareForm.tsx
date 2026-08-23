@@ -50,6 +50,28 @@ const INTEREST_OPTIONS: { value: string; label: string }[] = [
   { value: "altro", label: "Altro" },
 ];
 
+const OCCASION_OPTIONS: { value: string; label: string }[] = [
+  { value: "addio_al_nubilato", label: "Addio al nubilato" },
+  { value: "compleanno", label: "Compleanno" },
+  { value: "baby_shower", label: "Baby shower" },
+  { value: "evento_privato", label: "Evento privato" },
+  { value: "evento_aziendale", label: "Evento aziendale" },
+  { value: "giornata_tra_amiche", label: "Giornata tra amiche" },
+  { value: "ricorrenza", label: "Ricorrenza" },
+  { value: "altro", label: "Altro" },
+];
+
+const OCCASION_PARAM_TO_VALUE: Record<string, string> = {
+  "addio-al-nubilato": "addio_al_nubilato",
+  compleanno: "compleanno",
+  "baby-shower": "baby_shower",
+  "evento-privato": "evento_privato",
+  "evento-aziendale": "evento_aziendale",
+  "giornata-tra-amiche": "giornata_tra_amiche",
+  ricorrenza: "ricorrenza",
+  altro: "altro",
+};
+
 // Mappa del parametro ?tipo= (passato dalle CTA contestuali, Step 12C) al
 // valore reale del select "Che cosa vorresti organizzare?" — precompila
 // senza impedire la modifica (il campo resta un select normale, editabile).
@@ -58,12 +80,17 @@ const TIPO_PARAM_TO_REQUEST_TYPE: Record<string, string> = {
   ritiro: "ritiro",
   famiglie: "famiglie",
   "in-viaggio": "in_viaggio",
+  "evento-privato": "evento_privato",
+  "evento-azienda": "evento_azienda",
 };
 
 export function PortaNareForm() {
   const searchParams = useSearchParams();
   const tipoParam = searchParams.get("tipo") ?? "";
   const preselectedRequestType = TIPO_PARAM_TO_REQUEST_TYPE[tipoParam] ?? "";
+  const occasionParam = searchParams.get("occasione") ?? "";
+  const preselectedOccasion = OCCASION_PARAM_TO_VALUE[occasionParam] ?? "";
+  const sourcePage = tipoParam === "evento-privato" ? "/occasioni-speciali" : "/porta-nare-da-te";
 
   const [state, formAction, isPending] = useActionState(
     async (_prev: LeadSubmitResult | null, formData: FormData) => submitNareLeadRequest(formData),
@@ -102,7 +129,7 @@ export function PortaNareForm() {
         <input id="lead-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <input type="hidden" name="formRenderedAt" value={renderedAt} />
-      <input type="hidden" name="sourcePage" value="/porta-nare-da-te" />
+      <input type="hidden" name="sourcePage" value={sourcePage} />
       <input type="hidden" name="utmSource" value={searchParams.get("utm_source") ?? ""} />
       <input type="hidden" name="utmMedium" value={searchParams.get("utm_medium") ?? ""} />
       <input type="hidden" name="utmCampaign" value={searchParams.get("utm_campaign") ?? ""} />
@@ -135,6 +162,19 @@ export function PortaNareForm() {
           </option>
         ))}
       </Select>
+
+      {requestType === "evento_privato" && (
+        <Select label="Qual è l'occasione?" name="occasionType" defaultValue={preselectedOccasion} required>
+          <option value="" disabled>
+            Scegli un&apos;opzione
+          </option>
+          {OCCASION_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </Select>
+      )}
 
       {showRest && (
         <>

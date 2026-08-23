@@ -74,6 +74,11 @@ export function Footer() {
                 Newsletter, quindi nessun bottone/badge, solo un link in più
                 nella stessa lista. */}
             <li>
+              <Link href="/occasioni-speciali" className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
+                Occasioni speciali
+              </Link>
+            </li>
+            <li>
               <Link href="/porta-nare-da-te" className="text-small text-[var(--color-foreground-muted)] hover:text-[var(--color-accent-text)]">
                 Porta Narè da te
               </Link>

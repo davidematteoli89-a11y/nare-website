@@ -71,7 +71,7 @@ export default function PrivacyPage() {
         </a>{" "}
         (o nelle CTA presenti su Narè Incontri, Ritiri, Famiglie e In Viaggio), raccogliamo: nome (obbligatorio),
         cognome (facoltativo), email (obbligatoria), telefono (facoltativo), città e regione/provincia, il tipo di
-        richiesta e i dettagli che ci fornisci (numero indicativo di persone, periodo o data desiderata, interessi,
+        richiesta, l&apos;occasione quando applicabile e i dettagli che ci fornisci (numero indicativo di persone, periodo o data desiderata, interessi,
         messaggio libero), oltre al consenso esplicito che presti tramite l&apos;apposita casella (mai preselezionata).
         Questi dati vengono trasmessi dal nostro server al gestionale interno di MeLoProduco per essere gestiti da
         Cristina in vista di un eventuale contatto — non vengono mai inviati direttamente dal tuo browser. Dopo

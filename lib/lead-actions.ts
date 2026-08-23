@@ -59,6 +59,16 @@ const INTERESTS = new Set([
   "stagionalita",
   "altro",
 ]);
+const OCCASION_TYPES = new Set([
+  "addio_al_nubilato",
+  "compleanno",
+  "baby_shower",
+  "evento_privato",
+  "evento_aziendale",
+  "giornata_tra_amiche",
+  "ricorrenza",
+  "altro",
+]);
 
 function str(formData: FormData, key: string, maxLength: number): string {
   const raw = formData.get(key);
@@ -82,6 +92,7 @@ export async function submitNareLeadRequest(formData: FormData): Promise<LeadSub
   const email = str(formData, "email", 254).toLowerCase();
   const phone = str(formData, "phone", 40);
   const requestTypeRaw = str(formData, "requestType", 50);
+  const occasionTypeRaw = str(formData, "occasionType", 50);
   const city = str(formData, "city", 100);
   const region = str(formData, "region", 100);
   const peopleRangeRaw = str(formData, "peopleRange", 50);
@@ -101,10 +112,18 @@ export async function submitNareLeadRequest(formData: FormData): Promise<LeadSub
   }
 
   const requestType = REQUEST_TYPES.has(requestTypeRaw) ? requestTypeRaw : null;
+  const occasionType = OCCASION_TYPES.has(occasionTypeRaw) ? occasionTypeRaw : undefined;
   const timingType = TIMING_TYPES.has(timingTypeRaw) ? timingTypeRaw : "da_definire";
   const peopleRange = PEOPLE_RANGES.has(peopleRangeRaw) ? peopleRangeRaw : undefined;
 
-  if (!firstName || !email || !EMAIL_REGEX.test(email) || !city || !requestType) {
+  if (
+    !firstName ||
+    !email ||
+    !EMAIL_REGEX.test(email) ||
+    !city ||
+    !requestType ||
+    (requestType === "evento_privato" && !occasionType)
+  ) {
     return { ok: false, error: "validation" };
   }
 
@@ -114,6 +133,7 @@ export async function submitNareLeadRequest(formData: FormData): Promise<LeadSub
     email,
     phone,
     requestType,
+    occasionType,
     city,
     region,
     peopleRange,

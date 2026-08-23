@@ -31,6 +31,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/ritiri",
     "/famiglie",
     "/in-viaggio",
+    "/occasioni-speciali",
+    "/porta-nare-da-te",
     "/cristina",
     "/cristina-in-rai",
     "/newsletter",
